@@ -16,7 +16,7 @@
       <img src={AppLogo} class="logo" alt="Mir Commander Logo" />
     </div>
     <div class="name disable-selection">Mir Commander</div>
-    <div class="version disable-selection">Version 0.2.0</div>
+    <div class="version disable-selection">Version {__APP_VERSION__}</div>
   </div>
   <div class="tab-container">
     <Tabs {tabs} activeTabId="about" let:activeTabId>

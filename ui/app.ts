@@ -70,3 +70,4 @@ export async function getStartupMessages(): Promise<string[]> {
     return [];
   }
 }
+

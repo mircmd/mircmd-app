@@ -43,6 +43,10 @@
     nodes = rootNode.children.map(convertProjectNodeToTreeNode);
   }
 
+  export function refresh(): void {
+    loadProjectNodes();
+  }
+
   onMount(() => {
     loadProjectNodes();
   });

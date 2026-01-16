@@ -9,6 +9,7 @@ mod config;
 mod consts;
 mod file_manager;
 mod logging;
+mod menu;
 mod plugins;
 mod project;
 
@@ -36,7 +37,10 @@ fn main() {
         }
     };
 
+    unsafe { std::env::set_var("WEBKIT_DISABLE_DMABUF_RENDERER", "1") };
+
     let app = tauri::Builder::default()
+        .plugin(tauri_plugin_dialog::init())
         .register_uri_scheme_protocol("plugin", plugins::protocol::plugin_protocol_handler)
         .manage(Mutex::new(app_state::AppState::new()))
         .invoke_handler(tauri::generate_handler![
@@ -44,12 +48,13 @@ fn main() {
             commands::app::get_node_data_by_id,
             commands::app::get_app_config,
             commands::app::get_startup_messages,
-            commands::dialog::open_dialog,
             commands::logging::log,
             commands::plugins::import_file,
             commands::plugins::get_plugins
         ])
         .setup(|app| {
+            menu::create_menu(app)?;
+
             let state_handle = app.state::<Mutex<app_state::AppState>>();
             let mut state = state_handle.lock().unwrap();
 
@@ -64,8 +69,7 @@ fn main() {
                 .resizable(true)
                 .position(state.config.window.pos.0 as f64, state.config.window.pos.1 as f64)
                 .inner_size(state.config.window.size.0 as f64, state.config.window.size.1 as f64)
-                .build()
-                .unwrap();
+                .build()?;
 
             let window_handle = window.clone();
 
@@ -97,16 +101,18 @@ fn main() {
         .build(tauri::generate_context!())
         .expect("error while running tauri application");
 
-    app.run(|app_handle, event| match event {
-        tauri::RunEvent::Ready => {
-            debug!(target: "Core", "Mir Commander started");
-        }
-        tauri::RunEvent::Exit { .. } => {
-            let state_handle = app_handle.state::<Mutex<app_state::AppState>>();
-            if let Ok(state) = state_handle.lock() {
-                state.config.save().ok();
+    app.run(|app_handle, event| {
+        match event {
+            tauri::RunEvent::Ready => {
+                debug!(target: "Core", "Mir Commander started");
             }
+            tauri::RunEvent::Exit { .. } => {
+                let state_handle = app_handle.state::<Mutex<app_state::AppState>>();
+                if let Ok(state) = state_handle.lock() {
+                    state.config.save().ok();
+                }
+            }
+            _ => {}
         }
-        _ => {}
     });
 }

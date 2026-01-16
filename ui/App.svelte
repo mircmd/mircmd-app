@@ -1,13 +1,13 @@
 <script lang="ts">
   import { onMount, tick } from "svelte";
-  import { getAppConfig, getStartupMessages } from "./app";
+  import { getAppConfig, getStartupMessages, isDesktop } from "./app";
   import ConsoleOutput from "./docks/console_output.svelte";
   import Explorer from "./docks/explorer.svelte";
+  import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
   import WindowManager from "./lib/components/window_manager.svelte";
   import type { WindowItem } from "./lib/components/window_manager.svelte";
   import Workspace from "./lib/components/workspace.svelte";
   import type { WorkspaceState } from "./lib/components/workspace.svelte";
-  import { open } from "./utils/dialog";
   import { getPlugins } from "./utils/plugins";
   import {
     loadMoleculeVisualizer,
@@ -19,6 +19,7 @@
   import iconVolumeCube from "./assets/icons/volume_cube.png";
 
   let consoleOutput: ConsoleOutput;
+  let explorer: Explorer;
   let visualizerPlugin: ProgramPlugin | null = null;
   let visualizerHtml = "";
 
@@ -29,6 +30,16 @@
     const startupMessages = await getStartupMessages();
     for (const message of startupMessages) {
       consoleOutput?.appendLine(message);
+    }
+
+    if (isDesktop) {
+      const appWebview = getCurrentWebviewWindow();
+      appWebview.listen<boolean>("explorer_refresh", () => {
+        explorer?.refresh();
+      });
+      appWebview.listen<string>("console_output_append_line", (event) => {
+        consoleOutput?.appendLine(event.payload);
+      });
     }
   });
 
@@ -173,7 +184,6 @@
             <h3>Document 1</h3>
             <p>This is a floating window with some example content.</p>
             <div class="actions">
-              <button on:click={() => open.about()}>About</button>
               <button on:click={handleGetPlugins}>List Plugins</button>
             </div>
           </div>
@@ -227,7 +237,7 @@
       {#if dock.id === "console"}
         <ConsoleOutput bind:this={consoleOutput} />
       {:else if dock.id === "explorer"}
-        <Explorer />
+        <Explorer bind:this={explorer} />
       {:else}
         <div class="default-dock-content">
           <p>{dock.content}</p>

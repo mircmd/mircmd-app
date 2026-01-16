@@ -1,0 +1,28 @@
+# Dockerfile for building MirCommander on Linux
+# Supports: amd64, aarch64
+
+FROM rust:1.92.0-trixie AS base
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    pkg-config \
+    nodejs \
+    libwebkit2gtk-4.1-dev \
+    build-essential \
+    make \
+    patchelf \
+    file \
+    wget
+
+RUN cargo install cargo-component --locked
+RUN cargo install tauri-cli --locked
+RUN rustup target add wasm32-wasip2
+
+RUN mkdir -p /root/.local/bin/
+RUN wget https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-$(uname -m).AppImage \
+    -O /root/.local/bin/appimagetool.AppImage
+RUN chmod +x /root/.local/bin/appimagetool.AppImage
+
+RUN mkdir -p /root/.cache/appimage/
+RUN wget https://github.com/AppImage/type2-runtime/releases/download/continuous/runtime-$(uname -m) \
+    -O /root/.cache/appimage/runtime
+RUN chmod +x /root/.cache/appimage/runtime

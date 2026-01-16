@@ -37,3 +37,14 @@ wasmtime = "40.0.1"
 wasmtime-wasi = "40.0.1"
 wit-bindgen = "0.50.0"
 uuid = { version = "1.19.0", features = ["v7", "serde"] }
+tauri-plugin-dialog = "2.6.0"
+
+[profile.dev]
+incremental = true
+
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = "s"
+panic = "abort"
+strip = true

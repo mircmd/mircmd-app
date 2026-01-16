@@ -1,5 +1,5 @@
 {
-  "name": "mircmd-desktop",
+  "name": "mircmd",
   "private": true,
   "version": "0.3.0",
   "type": "module",
@@ -19,7 +19,7 @@
     "vite": "^7.2.4"
   },
   "dependencies": {
-    "@bytecodealliance/preview2-shim": "^0.17.6",
-    "@tauri-apps/api": "^2.9.1"
+    "@tauri-apps/api": "^2.9.1",
+    "@tauri-apps/plugin-dialog": "^2.6.0"
   }
 }

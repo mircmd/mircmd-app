@@ -49,8 +49,9 @@ fn main() {
             commands::app::get_app_config,
             commands::app::get_startup_messages,
             commands::logging::log,
-            commands::plugins::import_file,
-            commands::plugins::get_plugins
+            commands::plugins::get_plugins,
+            commands::project::get_node_data,
+            commands::project::import_files,
         ])
         .setup(|app| {
             menu::create_menu(app)?;
@@ -59,7 +60,7 @@ fn main() {
             let mut state = state_handle.lock().unwrap();
 
             for file in args.files {
-                if let Err(e) = state.import_file(&file) {
+                if let Err(e) = state.import_file(&file, None) {
                     state.startup_messages.push(e);
                 }
             }
@@ -101,18 +102,16 @@ fn main() {
         .build(tauri::generate_context!())
         .expect("error while running tauri application");
 
-    app.run(|app_handle, event| {
-        match event {
-            tauri::RunEvent::Ready => {
-                debug!(target: "Core", "Mir Commander started");
-            }
-            tauri::RunEvent::Exit { .. } => {
-                let state_handle = app_handle.state::<Mutex<app_state::AppState>>();
-                if let Ok(state) = state_handle.lock() {
-                    state.config.save().ok();
-                }
-            }
-            _ => {}
+    app.run(|app_handle, event| match event {
+        tauri::RunEvent::Ready => {
+            debug!(target: "Core", "Mir Commander started");
         }
+        tauri::RunEvent::Exit { .. } => {
+            let state_handle = app_handle.state::<Mutex<app_state::AppState>>();
+            if let Ok(state) = state_handle.lock() {
+                state.config.save().ok();
+            }
+        }
+        _ => {}
     });
 }

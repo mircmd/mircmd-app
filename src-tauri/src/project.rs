@@ -39,6 +39,20 @@ impl ProjectNode {
 
         None
     }
+
+    pub fn find_by_id_mut(&mut self, id: &Uuid) -> Option<&mut ProjectNode> {
+        if &self.id == id {
+            return Some(self);
+        }
+
+        for child in &mut self.children {
+            if let Some(found) = child.find_by_id_mut(id) {
+                return Some(found);
+            }
+        }
+
+        None
+    }
 }
 
 /// Raw node structure for deserializing plugin output (without id)

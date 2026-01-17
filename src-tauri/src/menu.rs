@@ -1,8 +1,6 @@
-use crate::app_state::AppState;
-use std::sync::Mutex;
+use crate::app_state::import_files;
 use tauri::menu::*;
-use tauri::{App, AppHandle, Emitter, Manager, Result, WebviewUrl, WebviewWindowBuilder};
-use tauri_plugin_dialog::DialogExt;
+use tauri::{App, AppHandle, Result, WebviewUrl, WebviewWindowBuilder};
 
 pub fn create_menu(app: &mut App) -> Result<()> {
     let handle = app.handle();
@@ -55,31 +53,25 @@ pub fn create_menu(app: &mut App) -> Result<()> {
 
     app.on_menu_event(move |app_handle: &AppHandle, event| match event.id().as_ref() {
         "about" => {
-            WebviewWindowBuilder::new(app_handle, "about", WebviewUrl::App("about.html".to_string().into()))
-                .title("About Mir Commander".to_string())
-                .resizable(false)
-                .inner_size(500.0, 430.0)
-                .build()
-                .unwrap();
-        }
-        "import_files" => {
-            let handle = app_handle.clone();
-            app_handle.dialog().file().pick_files(move |file_paths| {
-                if let Some(files) = file_paths {
-                    let state_handle = handle.state::<Mutex<AppState>>();
-                    let mut state = state_handle.lock().unwrap();
-                    for file in files {
-                        match state.import_file(file.as_path().unwrap()) {
-                            Ok(_) => {
-                                let _ = handle.emit("explorer_refresh", true);
-                            }
-                            Err(e) => {
-                                let _ = handle.emit("console_output_append_line", e);
-                            }
-                        }
+            let window_result =
+                WebviewWindowBuilder::new(app_handle, "about", WebviewUrl::App("about.html".to_string().into()))
+                    .title("About Mir Commander".to_string())
+                    .resizable(false)
+                    .inner_size(500.0, 430.0)
+                    .build();
+
+            match window_result {
+                Ok(window) => {
+                    #[cfg(not(target_os = "macos"))]
+                    {
+                        let _ = window.remove_menu();
                     }
                 }
-            });
+                Err(e) => eprintln!("Failed to create about window: {}", e),
+            }
+        }
+        "import_files" => {
+            import_files(app_handle.clone(), None);
         }
         "settings" => {
             println!("Click: Settings");

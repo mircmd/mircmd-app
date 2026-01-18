@@ -21,9 +21,9 @@ pub fn get_app_config(state: tauri::State<Mutex<AppState>>) -> Config {
 
 #[tauri::command]
 pub fn get_startup_messages(state: tauri::State<Mutex<AppState>>) -> Vec<String> {
-    let mut app = state.lock().unwrap();
+    let app = state.lock().unwrap();
 
-    std::mem::take(&mut app.startup_messages)
+    app.startup_messages.clone()
 }
 
 #[tauri::command]

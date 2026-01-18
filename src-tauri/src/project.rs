@@ -6,7 +6,7 @@ pub struct ProjectNode {
     pub id: Uuid,
     pub name: String,
     pub kind: String,
-    #[serde(skip)]
+    // #[serde(skip)]
     pub data: Vec<u8>,
     pub children: Vec<ProjectNode>,
 }
@@ -60,6 +60,7 @@ impl ProjectNode {
 pub struct RawProjectNode {
     pub name: String,
     pub kind: String,
+    pub data: Vec<u8>,
     #[serde(default)]
     pub children: Vec<RawProjectNode>,
 }
@@ -70,7 +71,7 @@ impl From<RawProjectNode> for ProjectNode {
             id: Uuid::now_v7(),
             name: raw.name,
             kind: raw.kind,
-            data: Vec::new(),
+            data: raw.data,
             children: raw.children.into_iter().map(ProjectNode::from).collect(),
         }
     }

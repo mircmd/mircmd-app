@@ -2,12 +2,14 @@ import { invoke } from '@tauri-apps/api/core';
 import { isDesktop } from '../app';
 
 export enum PluginType {
-  FileImporter = 'file_importer',
+  Icons = 'Icons',
+  FileImporter = 'FileImporter',
+  Program = 'Program',
 }
 
 export enum PluginTarget {
-  Core = 'core',
-  Ui = 'ui',
+  Core = 'Core',
+  Ui = 'Ui',
 }
 
 export interface PluginMetadata {

@@ -1,8 +1,8 @@
 <!--
   @component SubWindow
 
-  Individual sub-window component.
-  Represents a single sub-window within a window manager area with title bar and window controls.
+  Individual sub-window component within WindowManager.
+  Represents a single sub-window with title bar and window controls.
 
   ## Features
   - Title bar with window title and optional icon
@@ -19,17 +19,15 @@
   - `window: WindowData` - Window data object (see Types below)
   - `offsetX: number` - Horizontal offset for scroll compensation (default: 0)
   - `offsetY: number` - Vertical offset for scroll compensation (default: 0)
-
-  ## Events
-  - `close` - Fired when close button is clicked
-  - `minimize` - Fired when minimize button is clicked
-  - `maximize` - Fired when maximize button is clicked or title bar double-clicked
-  - `focus` - Fired when window is clicked
-  - `dragstart` - Fired when drag starts: `{ clientX: number, clientY: number }`
-  - `resizestart` - Fired when resize starts: `{ clientX: number, clientY: number, direction: ResizeDirection }`
+  - `onclose: () => void` - Callback when close button is clicked
+  - `onminimize: () => void` - Callback when minimize button is clicked
+  - `onmaximize: () => void` - Callback when maximize button is clicked
+  - `onfocus: () => void` - Callback when window is clicked
+  - `ondragstart: (data: { clientX: number, clientY: number }) => void` - Callback when drag starts
+  - `onresizestart: (data: { clientX: number, clientY: number, direction: ResizeDirection }) => void` - Callback when resize starts
 
   ## Slots
-  - default - Content of the window
+  - children - Content of the window
 
   ## Types
   ```typescript
@@ -49,29 +47,8 @@
 
   type ResizeDirection = "n" | "s" | "e" | "w" | "ne" | "nw" | "se" | "sw";
   ```
-
-  ## Usage Example
-  ```svelte
-  <SubWindow
-    window={{
-      id: "editor",
-      title: "Document Editor",
-      icon: "/icons/edit.svg",
-      x: 100,
-      y: 50,
-      width: 600,
-      height: 400,
-      zIndex: 1,
-      state: "normal"
-    }}
-    on:close={handleClose}
-    on:maximize={handleMaximize}
-  >
-    <EditorContent />
-  </SubWindow>
-  ```
 -->
-<script context="module" lang="ts">
+<script lang="ts" module>
   export type WindowState = "normal" | "minimized" | "maximized";
 
   export interface WindowData {
@@ -95,77 +72,105 @@
     | "nw"
     | "se"
     | "sw";
+
+  const RESIZE_DIRECTIONS: ResizeDirection[] = [
+    "n",
+    "s",
+    "e",
+    "w",
+    "ne",
+    "nw",
+    "se",
+    "sw",
+  ];
 </script>
 
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
-
+  import type { Snippet } from "svelte";
   import arrowDownIcon from "../../assets/icons/arrow_down.svg";
   import closeIcon from "../../assets/icons/close.svg";
   import squareEmptyIcon from "../../assets/icons/square_empty.svg";
   import squareFilledIcon from "../../assets/icons/square_filled.svg";
 
-  export let window: WindowData;
-  export let offsetX: number = 0;
-  export let offsetY: number = 0;
-
-  const dispatch = createEventDispatcher<{
-    close: void;
-    minimize: void;
-    maximize: void;
-    focus: void;
-    dragstart: { clientX: number; clientY: number };
-    resizestart: {
-      clientX: number;
-      clientY: number;
-      direction: ResizeDirection;
-    };
-  }>();
-
-  // Derived state from window.state
-  $: windowState = window.state ?? "normal";
-  $: isNormal = windowState === "normal";
-  $: isMinimized = windowState === "minimized";
-  $: isMaximized = windowState === "maximized";
-
-  // Event handlers
-  function onTitleBarMouseDown(event: MouseEvent) {
-    if (isMaximized) return;
-    event.preventDefault();
-    dispatch("dragstart", { clientX: event.clientX, clientY: event.clientY });
+  interface DragStartEvent {
+    clientX: number;
+    clientY: number;
   }
 
-  function onResizeHandleMouseDown(
+  interface ResizeStartEvent {
+    clientX: number;
+    clientY: number;
+    direction: ResizeDirection;
+  }
+
+  interface Props {
+    window: WindowData;
+    offsetX?: number;
+    offsetY?: number;
+    onclose?: () => void;
+    onminimize?: () => void;
+    onmaximize?: () => void;
+    onfocus?: () => void;
+    ondragstart?: (data: DragStartEvent) => void;
+    onresizestart?: (data: ResizeStartEvent) => void;
+    children?: Snippet;
+  }
+
+  let {
+    window,
+    offsetX = 0,
+    offsetY = 0,
+    onclose,
+    onminimize,
+    onmaximize,
+    onfocus,
+    ondragstart,
+    onresizestart,
+    children,
+  }: Props = $props();
+
+  // Derived state from window.state
+  let windowState = $derived(window.state ?? "normal");
+  let isNormal = $derived(windowState === "normal");
+  let isMinimized = $derived(windowState === "minimized");
+  let isMaximized = $derived(windowState === "maximized");
+
+  function handleTitleBarMouseDown(event: MouseEvent): void {
+    if (isMaximized) return;
+    event.preventDefault();
+    ondragstart?.({ clientX: event.clientX, clientY: event.clientY });
+  }
+
+  function handleResizeMouseDown(
     event: MouseEvent,
     direction: ResizeDirection
-  ) {
+  ): void {
     event.preventDefault();
     event.stopPropagation();
-    dispatch("resizestart", {
+    onresizestart?.({
       clientX: event.clientX,
       clientY: event.clientY,
       direction,
     });
   }
 
-  function onWindowMouseDown() {
-    dispatch("focus");
+  function handleWindowMouseDown(): void {
+    onfocus?.();
   }
 
-  function onClose() {
-    dispatch("close");
+  function handleClose(): void {
+    onclose?.();
   }
 
-  function onMinimize() {
-    dispatch("minimize");
+  function handleMinimize(): void {
+    onminimize?.();
   }
 
-  function onMaximize() {
-    dispatch("maximize");
+  function handleMaximize(): void {
+    onmaximize?.();
   }
 </script>
 
-<!-- svelte-ignore a11y-no-static-element-interactions -->
 <div
   class="sub-window"
   class:minimized={isMinimized}
@@ -175,13 +180,15 @@
   style:top={isMaximized ? null : `${window.y + offsetY}px`}
   style:width={isMaximized ? null : `${window.width}px`}
   style:height={isMaximized || isMinimized ? null : `${window.height}px`}
-  on:mousedown={onWindowMouseDown}
+  onmousedown={handleWindowMouseDown}
+  role="dialog"
+  aria-label={window.title}
 >
   <!-- Title bar -->
   <div
     class="sub-window-title-bar"
-    on:mousedown={onTitleBarMouseDown}
-    on:dblclick|stopPropagation={onMaximize}
+    onmousedown={handleTitleBarMouseDown}
+    ondblclick={handleMaximize}
     role="button"
     tabindex="0"
   >
@@ -191,11 +198,13 @@
       {/if}
     </div>
     <span class="sub-window-title disable-selection">{window.title}</span>
-    <!-- svelte-ignore a11y-no-static-element-interactions -->
-    <div class="sub-window-buttons" on:dblclick|stopPropagation>
+    <div class="sub-window-buttons" ondblclick={(e) => e.stopPropagation()}>
       <button
         class="sub-window-btn minimize"
-        on:click|stopPropagation={onMinimize}
+        onclick={(e) => {
+          e.stopPropagation();
+          handleMinimize();
+        }}
         aria-label={isMinimized ? "Restore window" : "Minimize window"}
       >
         <img
@@ -207,7 +216,10 @@
       </button>
       <button
         class="sub-window-btn maximize"
-        on:click|stopPropagation={onMaximize}
+        onclick={(e) => {
+          e.stopPropagation();
+          handleMaximize();
+        }}
         aria-label={isMaximized ? "Restore window" : "Maximize window"}
       >
         <img
@@ -218,7 +230,10 @@
       </button>
       <button
         class="sub-window-btn close"
-        on:click|stopPropagation={onClose}
+        onclick={(e) => {
+          e.stopPropagation();
+          handleClose();
+        }}
         aria-label="Close window"
       >
         <img src={closeIcon} alt="Close" class="sub-window-btn-icon" />
@@ -229,18 +244,20 @@
   <!-- Content area (hidden when minimized) -->
   {#if !isMinimized}
     <div class="sub-window-content">
-      <slot>
+      {#if children}
+        {@render children()}
+      {:else}
         <p>Window content</p>
-      </slot>
+      {/if}
     </div>
   {/if}
 
   <!-- Resize handles (only in normal state) -->
   {#if isNormal}
-    {#each ["n", "s", "e", "w", "ne", "nw", "se", "sw"] as dir (dir)}
+    {#each RESIZE_DIRECTIONS as dir (dir)}
       <div
         class="resize-handle resize-{dir}"
-        on:mousedown={(e) => onResizeHandleMouseDown(e, dir as ResizeDirection)}
+        onmousedown={(e) => handleResizeMouseDown(e, dir)}
         role="button"
         tabindex="-1"
         aria-label="Resize {dir}"
@@ -369,7 +386,7 @@
     cursor: default;
   }
 
-  /* Maximized window - fills the visible container area */
+  /* Maximized window */
   .sub-window.maximized {
     position: absolute;
     inset: 0;

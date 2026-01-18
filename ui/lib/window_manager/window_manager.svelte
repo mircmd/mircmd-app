@@ -427,19 +427,13 @@
         window={win}
         {offsetX}
         {offsetY}
-        on:focus={() => bringToFront(win.id)}
-        on:close={() => closeWindow(win.id)}
-        on:minimize={() => minimizeWindow(win.id)}
-        on:maximize={() => maximizeWindow(win.id)}
-        on:dragstart={(e) =>
-          startDrag(win.id, e.detail.clientX, e.detail.clientY)}
-        on:resizestart={(e) =>
-          startResize(
-            win.id,
-            e.detail.clientX,
-            e.detail.clientY,
-            e.detail.direction
-          )}
+        onfocus={() => bringToFront(win.id)}
+        onclose={() => closeWindow(win.id)}
+        onminimize={() => minimizeWindow(win.id)}
+        onmaximize={() => maximizeWindow(win.id)}
+        ondragstart={(e) => startDrag(win.id, e.clientX, e.clientY)}
+        onresizestart={(e) =>
+          startResize(win.id, e.clientX, e.clientY, e.direction)}
       >
         {#if win.pluginData}
           <div
@@ -466,19 +460,13 @@
           window={win}
           offsetX={0}
           offsetY={0}
-          on:focus={() => bringToFront(win.id)}
-          on:close={() => closeWindow(win.id)}
-          on:minimize={() => minimizeWindow(win.id)}
-          on:maximize={() => maximizeWindow(win.id)}
-          on:dragstart={(e) =>
-            startDrag(win.id, e.detail.clientX, e.detail.clientY)}
-          on:resizestart={(e) =>
-            startResize(
-              win.id,
-              e.detail.clientX,
-              e.detail.clientY,
-              e.detail.direction
-            )}
+          onfocus={() => bringToFront(win.id)}
+          onclose={() => closeWindow(win.id)}
+          onminimize={() => minimizeWindow(win.id)}
+          onmaximize={() => maximizeWindow(win.id)}
+          ondragstart={(e) => startDrag(win.id, e.clientX, e.clientY)}
+          onresizestart={(e) =>
+            startResize(win.id, e.clientX, e.clientY, e.direction)}
         >
           {#if win.pluginData}
             <div class="plugin-content">
@@ -496,19 +484,13 @@
       window={win}
       offsetX={0}
       offsetY={0}
-      on:focus={() => bringToFront(win.id)}
-      on:close={() => closeWindow(win.id)}
-      on:minimize={() => minimizeWindow(win.id)}
-      on:maximize={() => maximizeWindow(win.id)}
-      on:dragstart={(e) =>
-        startDrag(win.id, e.detail.clientX, e.detail.clientY)}
-      on:resizestart={(e) =>
-        startResize(
-          win.id,
-          e.detail.clientX,
-          e.detail.clientY,
-          e.detail.direction
-        )}
+      onfocus={() => bringToFront(win.id)}
+      onclose={() => closeWindow(win.id)}
+      onminimize={() => minimizeWindow(win.id)}
+      onmaximize={() => maximizeWindow(win.id)}
+      ondragstart={(e) => startDrag(win.id, e.clientX, e.clientY)}
+      onresizestart={(e) =>
+        startResize(win.id, e.clientX, e.clientY, e.direction)}
     >
       {#if win.pluginData}
         <div

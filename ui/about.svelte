@@ -1,7 +1,7 @@
 <script lang="ts">
   import AppLogo from "./assets/app.png";
   import LICENSE from "./assets/LICENSE.txt?raw";
-  import Tabs from "./lib/components/tabs.svelte";
+  import Tabs from "./lib/tabs.svelte";
 
   const tabs = [
     { id: "about", title: "About" },
@@ -19,40 +19,43 @@
     <div class="version disable-selection">Version {__APP_VERSION__}</div>
   </div>
   <div class="tab-container">
-    <Tabs {tabs} activeTabId="about" let:activeTabId>
-      {#if activeTabId === "about"}
-        <div class="about-content">
-          <p>
-            A modern, powerful graphical user interface for molecular structure
-            modeling.
-          </p>
-          <div class="contact-links">
-            <span>Home Page:</span>
-            <a href="https://mircmd.com/">https://mircmd.com/</a>
-            <span>Telegram:</span>
-            <a href="https://t.me/mir_commander">https://t.me/mir_commander</a>
+    <Tabs {tabs} activeTabId="about">
+      {#snippet children(activeTabId)}
+        {#if activeTabId === "about"}
+          <div class="about-content">
+            <p>
+              A modern, powerful graphical user interface for molecular
+              structure modeling.
+            </p>
+            <div class="contact-links">
+              <span>Home Page:</span>
+              <a href="https://mircmd.com/">https://mircmd.com/</a>
+              <span>Telegram:</span>
+              <a href="https://t.me/mir_commander">https://t.me/mir_commander</a
+              >
+            </div>
           </div>
-        </div>
-      {:else if activeTabId === "authors"}
-        <div class="authors">
-          <div class="author">
-            <p>Yury V. Vishnevskiy</p>
-            <a href="mailto:yu.v.vishnevskiy@gmail.com"
-              >yu.v.vishnevskiy@gmail.com</a
-            >
+        {:else if activeTabId === "authors"}
+          <div class="authors">
+            <div class="author">
+              <p>Yury V. Vishnevskiy</p>
+              <a href="mailto:yu.v.vishnevskiy@gmail.com"
+                >yu.v.vishnevskiy@gmail.com</a
+              >
+            </div>
+            <div class="author">
+              <p>Valery V. Vishnevskiy</p>
+              <a href="mailto:v.v.vishnevskiy@gmail.com"
+                >v.v.vishnevskiy@gmail.com</a
+              >
+            </div>
           </div>
-          <div class="author">
-            <p>Valery V. Vishnevskiy</p>
-            <a href="mailto:v.v.vishnevskiy@gmail.com"
-              >v.v.vishnevskiy@gmail.com</a
-            >
+        {:else if activeTabId === "license"}
+          <div class="license">
+            <pre>{LICENSE}</pre>
           </div>
-        </div>
-      {:else if activeTabId === "license"}
-        <div class="license">
-          <pre>{LICENSE}</pre>
-        </div>
-      {/if}
+        {/if}
+      {/snippet}
     </Tabs>
   </div>
 </main>

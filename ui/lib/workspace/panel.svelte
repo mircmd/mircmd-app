@@ -1,140 +1,130 @@
 <!--
   @component Panel
 
-  Panel widget component for dockable panel content.
+  Panel widget component for dockable panel content within Workspace.
   Represents a single dockable panel with optional title bar and drag-out capability.
 
   ## Features
   - Optional title bar with text label
   - Draggable title bar for undocking
   - Floating mode during drag operations
-  - Position-aware styling (left/right/bottom)
   - Visibility toggle support
 
   ## Props
-  - `position: "left" | "right" | "bottom"` - Panel area position (default: "left")
   - `title: string` - Title bar text (default: "")
   - `visible: boolean` - Visibility state (default: true)
   - `movable: boolean` - Enable drag-to-undock (default: true)
   - `showTitle: boolean` - Show title bar (default: true)
-
-  ## Events
-  - `undock` - Fired when panel starts floating: `{ x: number, y: number }`
-  - `dragmove` - Fired during floating drag: `{ x: number, y: number }`
-  - `dragend` - Fired when floating drag ends
+  - `onundock: (position: { x: number, y: number }) => void` - Callback when panel starts floating
+  - `ondragmove: (position: { x: number, y: number }) => void` - Callback during floating drag
+  - `ondragend: () => void` - Callback when floating drag ends
 
   ## Slots
-  - default - Content of the panel
-
-  ## Usage Example
-  ```svelte
-  <Panel
-    position="left"
-    title="Project Explorer"
-    on:undock={(e) => handleUndock(e.detail)}
-  >
-    <Tree nodes={projectNodes} />
-  </Panel>
-  ```
+  - children - Content of the panel
 -->
 <script lang="ts">
-  import { createEventDispatcher, onDestroy } from "svelte";
+  import { onDestroy, type Snippet } from "svelte";
 
-  export let position: "left" | "right" | "bottom" = "left";
-  export let title: string = "";
-  export let visible: boolean = true;
-  export let movable: boolean = true;
-  export let showTitle: boolean = true;
+  interface DragPosition {
+    x: number;
+    y: number;
+  }
 
-  const dispatch = createEventDispatcher();
+  interface Props {
+    title?: string;
+    visible?: boolean;
+    movable?: boolean;
+    showTitle?: boolean;
+    onundock?: (position: DragPosition) => void;
+    ondragmove?: (position: DragPosition) => void;
+    ondragend?: () => void;
+    children?: Snippet;
+  }
 
-  let isDragging = false;
-  let isFloating = false;
-  let dragStartX = 0;
-  let dragStartY = 0;
-  let floatingX = 0;
-  let floatingY = 0;
+  let {
+    title = "",
+    visible = true,
+    movable = true,
+    showTitle = true,
+    onundock,
+    ondragmove,
+    ondragend,
+    children,
+  }: Props = $props();
 
-  function handleDragStart(event: MouseEvent) {
+  let isDragging = $state(false);
+  let isFloating = $state(false);
+  let dragStartX = $state(0);
+  let dragStartY = $state(0);
+  let floatingX = $state(0);
+  let floatingY = $state(0);
+
+  function handleDragStart(event: MouseEvent): void {
     if (!movable) return;
 
     isDragging = true;
     dragStartX = event.clientX;
     dragStartY = event.clientY;
 
+    document.addEventListener("mousemove", handleDragMove);
+    document.addEventListener("mouseup", handleDragEnd);
+
     event.preventDefault();
   }
 
-  function handleDragMove(event: MouseEvent) {
+  function handleDragMove(event: MouseEvent): void {
     if (!isDragging) return;
 
     const deltaX = event.clientX - dragStartX;
     const deltaY = event.clientY - dragStartY;
 
-    // Start floating mode if moved more than 10px
     if (!isFloating && (Math.abs(deltaX) > 10 || Math.abs(deltaY) > 10)) {
       isFloating = true;
       floatingX = event.clientX;
       floatingY = event.clientY;
-      dispatch("undock", { x: event.clientX, y: event.clientY });
+      onundock?.({ x: event.clientX, y: event.clientY });
     }
 
     if (isFloating) {
       floatingX = event.clientX;
       floatingY = event.clientY;
-      dispatch("dragmove", { x: event.clientX, y: event.clientY });
+      ondragmove?.({ x: event.clientX, y: event.clientY });
     }
   }
 
-  function handleDragEnd() {
+  function handleDragEnd(): void {
+    document.removeEventListener("mousemove", handleDragMove);
+    document.removeEventListener("mouseup", handleDragEnd);
+
     if (!isDragging) return;
 
     isDragging = false;
 
     if (isFloating) {
-      dispatch("dragend");
+      ondragend?.();
       isFloating = false;
     }
   }
 
-  function addDragListeners() {
-    document.addEventListener("mousemove", handleDragMove);
-    document.addEventListener("mouseup", handleDragEnd);
-  }
-
-  function removeDragListeners() {
+  onDestroy(() => {
     document.removeEventListener("mousemove", handleDragMove);
     document.removeEventListener("mouseup", handleDragEnd);
-  }
-
-  $: {
-    if (isDragging) {
-      addDragListeners();
-    } else {
-      removeDragListeners();
-    }
-  }
-
-  onDestroy(() => {
-    removeDragListeners();
   });
 
-  $: floatingStyle = isFloating
-    ? `position: fixed; left: ${floatingX - 100}px; top: ${floatingY - 10}px; width: 200px; height: 150px; z-index: 10000; box-shadow: 0 4px 12px rgba(0,0,0,0.3);`
-    : "";
+  let floatingStyle = $derived(
+    isFloating
+      ? `position: fixed; left: ${floatingX - 100}px; top: ${floatingY - 10}px; width: 200px; height: 150px; z-index: 10000; box-shadow: 0 4px 12px rgba(0,0,0,0.3);`
+      : ""
+  );
 </script>
 
 {#if visible}
-  <div
-    class="panel-widget panel-{position}"
-    class:floating={isFloating}
-    style={floatingStyle}
-  >
+  <div class="panel-widget" class:floating={isFloating} style={floatingStyle}>
     {#if showTitle && title}
       <div
         class="panel-title disable-selection background"
         class:draggable={movable}
-        on:mousedown={handleDragStart}
+        onmousedown={handleDragStart}
         role="button"
         tabindex="0"
       >
@@ -143,7 +133,9 @@
     {/if}
 
     <div class="panel-content background">
-      <slot />
+      {#if children}
+        {@render children()}
+      {/if}
     </div>
   </div>
 {/if}

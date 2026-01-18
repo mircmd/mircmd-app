@@ -6,12 +6,19 @@
   import { getStartupMessages, isDesktop } from "./app";
   import ConsoleOutput from "./docks/console_output.svelte";
   import Explorer from "./docks/explorer.svelte";
+  import type { ExpandedState, TreeNode } from "./lib/tree.svelte";
   import WindowManager from "./lib/window_manager/window_manager.svelte";
-  import Workspace from "./lib/workspace.svelte";
-  import type { WorkspaceState } from "./lib/workspace.svelte";
+  import Workspace from "./lib/workspace/workspace.svelte";
+  import type { WorkspaceState } from "./lib/workspace/workspace.svelte";
 
-  let consoleOutput: ConsoleOutput;
-  let explorer: Explorer;
+  let consoleOutput: ConsoleOutput | undefined = $state();
+  let explorer: Explorer | undefined = $state();
+
+  // Lifted state for docks to persist across panel moves
+  let consoleValue = $state("");
+  let explorerNodes: TreeNode[] = $state([]);
+  let explorerSelectedId: string | null = $state(null);
+  let explorerExpandedState: ExpandedState = $state({});
 
   onMount(async () => {
     const startupMessages = await getStartupMessages();
@@ -30,7 +37,7 @@
     }
   });
 
-  let workspaceState: WorkspaceState = {
+  let workspaceState = $state<WorkspaceState>({
     left: [
       {
         id: "left-group-1",
@@ -73,24 +80,35 @@
         size: 1,
       },
     ],
-  };
+  });
 </script>
 
 <div class="app-container">
-  <Workspace bind:state={workspaceState}>
+  <Workspace bind:data={workspaceState}>
     <WindowManager />
 
-    <svelte:fragment slot="dockContent" let:dock>
+    {#snippet dockContent(dock, _position)}
       {#if dock.id === "console"}
-        <ConsoleOutput bind:this={consoleOutput} />
+        <ConsoleOutput
+          bind:this={consoleOutput}
+          bind:value={consoleValue}
+          onappend={(text) =>
+            (consoleValue += (consoleValue ? "\n" : "") + text)}
+          onclear={() => (consoleValue = "")}
+        />
       {:else if dock.id === "explorer"}
-        <Explorer bind:this={explorer} />
+        <Explorer
+          bind:this={explorer}
+          bind:nodes={explorerNodes}
+          bind:selectedId={explorerSelectedId}
+          bind:expandedState={explorerExpandedState}
+        />
       {:else}
         <div class="default-dock-content">
           <p>{dock.content}</p>
         </div>
       {/if}
-    </svelte:fragment>
+    {/snippet}
   </Workspace>
 </div>
 

@@ -23,7 +23,7 @@
   import Menu from "../lib/menu.svelte";
   import type { MenuItem } from "../lib/menu.svelte";
   import Tree from "../lib/tree.svelte";
-  import type { TreeNode } from "../lib/tree.svelte";
+  import type { ExpandedState, TreeNode } from "../lib/tree.svelte";
   import { getWindowManager } from "../lib/window_manager/window_manager_context";
   import { loadBrowserPlugin, loadIconPlugin } from "../utils/browser_plugins";
   import { icon_store } from "../utils/icon_store";
@@ -35,8 +35,18 @@
   } from "../utils/plugins";
   import { getNodeData, importFiles } from "../utils/project";
 
-  let nodes: TreeNode[] = $state([]);
-  let selectedId: string | null = $state(null);
+  interface Props {
+    nodes?: TreeNode[];
+    selectedId?: string | null;
+    expandedState?: ExpandedState;
+  }
+
+  let {
+    nodes = $bindable([]),
+    selectedId = $bindable(null),
+    expandedState = $bindable({}),
+  }: Props = $props();
+
   let programPlugins: PluginInfo[] = $state([]);
 
   let contextMenuVisible: boolean = $state(false);
@@ -115,8 +125,8 @@
     }));
   }
 
-  function handleSelect(event: CustomEvent<{ node: TreeNode }>): void {
-    selectedId = event.detail.node.id;
+  function handleSelect(node: TreeNode): void {
+    selectedId = node.id;
   }
 
   function handleContextMenu(event: MouseEvent): void {
@@ -176,7 +186,7 @@
   role="tree"
   tabindex="-1"
 >
-  <Tree {nodes} {selectedId} on:select={handleSelect} />
+  <Tree {nodes} bind:selectedId bind:expandedState onselect={handleSelect} />
 </div>
 
 <Menu

@@ -8,55 +8,38 @@
   - Read-only text display
   - Vertical scrolling for overflow content
   - Optional monospace font for code/logs display
-  - Programmatic API for text manipulation
+  - Two-way binding for value
 
   ## Props
   - `monospace: boolean` - Use monospace font (default: false)
-  - `value: string` - Text content (default: "")
-
-  ## API Methods (exported functions)
-  - `appendLine(text: string): void` - Append a new line of text
-  - `clear(): void` - Clear all text content
-  - `getText(): string` - Get current text content
+  - `value: string` - Text content, supports two-way binding (default: "")
 
   ## Usage Example
   ```svelte
   <script>
-    let textArea;
+    let logContent = $state("");
+
+    function appendLog(text: string) {
+      logContent += (logContent ? "\n" : "") + text;
+    }
+
+    function clearLog() {
+      logContent = "";
+    }
   </script>
 
-  <TextArea bind:this={textArea} monospace />
-
-  <button on:click={() => textArea.appendLine("New log entry")}>Add Line</button>
+  <TextArea bind:value={logContent} monospace />
+  <button onclick={() => appendLog("New entry")}>Add</button>
+  <button onclick={clearLog}>Clear</button>
   ```
 -->
-<script lang="ts" context="module">
-  export interface TextAreaApi {
-    appendLine: (text: string) => void;
-    clear: () => void;
-    getText: () => string;
-  }
-</script>
-
 <script lang="ts">
-  export let monospace: boolean = false;
-  export let value: string = "";
-
-  export function appendLine(text: string): void {
-    if (value.length > 0) {
-      value += "\n" + text;
-    } else {
-      value = text;
-    }
+  interface Props {
+    monospace?: boolean;
+    value?: string;
   }
 
-  export function clear(): void {
-    value = "";
-  }
-
-  export function getText(): string {
-    return value;
-  }
+  let { monospace = false, value = $bindable("") }: Props = $props();
 </script>
 
 <textarea class="text-area" class:monospace bind:value readonly></textarea>

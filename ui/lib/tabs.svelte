@@ -1,7 +1,7 @@
 <!--
   @component Tabs
 
-  Tabs widget component for switching between content panels.
+  Tab widget component for switching between content panels.
   Provides a tab bar with selectable tabs and associated content area.
 
   ## Features
@@ -15,77 +15,98 @@
 
   ## Props
   - `tabs: Tab[]` - Array of tab objects with id and title
-  - `activeTabId: string` - ID of currently active tab
+  - `activeTabId: string` - ID of currently active tab (bindable)
   - `hideSingleTab: boolean` - Hide tab bar when only one tab exists (default: true)
   - `draggable: boolean` - Enable dragging tabs out of widget (default: false)
   - `reorderable: boolean` - Enable tab reordering (default: false)
   - `tabPosition: TabPosition` - Position of tab bar: "top" | "left" | "right" (default: "top")
-
-  ## Events
-  - `change` - Fired when active tab changes: `string` (tab id)
-  - `reorder` - Fired when tabs are reordered: `{ tabs: Tab[] }`
-  - `tabdragstart` - Fired when tab drag starts: `{ tabId: string, x: number, y: number }`
-  - `tabdragmove` - Fired during tab drag: `{ tabId: string, x: number, y: number }`
-  - `tabdragend` - Fired when tab drag ends: `{ tabId: string }`
+  - `onchange: (tabId: string) => void` - Callback when active tab changes
+  - `onreorder: (tabs: Tab[]) => void` - Callback when tabs are reordered
+  - `ontabdragstart: (data: TabDragEvent) => void` - Callback when tab drag starts
+  - `ontabdragmove: (data: TabDragEvent) => void` - Callback during tab drag
+  - `ontabdragend: (data: { tabId: string }) => void` - Callback when tab drag ends
 
   ## Slots
-  - default - Content area, receives `activeTabId` prop via let:activeTabId
+  - children - Content area, rendered via snippet with `activeTabId` parameter
 -->
-<script lang="ts" context="module">
+<script lang="ts" module>
   export interface Tab {
     id: string;
     title: string;
   }
 
   export type TabPosition = "top" | "left" | "right";
+
+  export interface TabDragEvent {
+    tabId: string;
+    x: number;
+    y: number;
+  }
 </script>
 
 <script lang="ts">
-  import { createEventDispatcher, onDestroy } from "svelte";
+  import { onDestroy, type Snippet } from "svelte";
 
-  export let tabs: Tab[] = [];
-  export let activeTabId: string = "";
-  export let hideSingleTab: boolean = true;
-  export let draggable: boolean = false;
-  export let reorderable: boolean = false;
-  export let tabPosition: TabPosition = "top";
-
-  const dispatch = createEventDispatcher<{
-    change: string;
-    reorder: { tabs: Tab[] };
-    tabdragstart: { tabId: string; x: number; y: number };
-    tabdragmove: { tabId: string; x: number; y: number };
-    tabdragend: { tabId: string };
-  }>();
-
-  $: showTabBar = !(hideSingleTab && tabs.length === 1);
-  $: isVertical = tabPosition === "left" || tabPosition === "right";
-
-  $: if (tabs.length > 0 && !tabs.some((t) => t.id === activeTabId)) {
-    activeTabId = tabs[0].id;
+  interface Props {
+    tabs: Tab[];
+    activeTabId?: string;
+    hideSingleTab?: boolean;
+    draggable?: boolean;
+    reorderable?: boolean;
+    tabPosition?: TabPosition;
+    onchange?: (tabId: string) => void;
+    onreorder?: (tabs: Tab[]) => void;
+    ontabdragstart?: (data: TabDragEvent) => void;
+    ontabdragmove?: (data: TabDragEvent) => void;
+    ontabdragend?: (data: { tabId: string }) => void;
+    children?: Snippet<[string]>;
   }
 
-  // Tab dragging state (for dragging out of widget)
-  let draggingTabId: string | null = null;
-  let dragStartX = 0;
-  let dragStartY = 0;
-  let isDraggingOut = false;
+  let {
+    tabs = [],
+    activeTabId = $bindable(""),
+    hideSingleTab = true,
+    draggable = false,
+    reorderable = false,
+    tabPosition = "top",
+    onchange,
+    onreorder,
+    ontabdragstart,
+    ontabdragmove,
+    ontabdragend,
+    children,
+  }: Props = $props();
 
-  // Reorder state (for reordering within tab bar)
-  let isReordering = false;
-  let reorderTabId: string | null = null;
-  let dropIndicatorIndex: number = -1;
-  let tabBarElement: HTMLElement;
-  let tabElements: Map<string, HTMLElement> = new Map();
+  // Derived state
+  let showTabBar = $derived(!(hideSingleTab && tabs.length === 1));
+  let isVertical = $derived(tabPosition === "left" || tabPosition === "right");
 
-  function selectTab(tabId: string) {
+  // Auto-select first tab if current is invalid
+  $effect(() => {
+    if (tabs.length > 0 && !tabs.some((t) => t.id === activeTabId)) {
+      activeTabId = tabs[0].id;
+    }
+  });
+
+  // Interaction state
+  let draggingTabId: string | null = $state(null);
+  let dragStartX = $state(0);
+  let dragStartY = $state(0);
+  let isDraggingOut = $state(false);
+  let isReordering = $state(false);
+  let reorderTabId: string | null = $state(null);
+  let dropIndicatorIndex = $state(-1);
+  let tabBarElement: HTMLElement | undefined = $state();
+  let tabElements = new Map<string, HTMLElement>();
+
+  function selectTab(tabId: string): void {
     if (activeTabId !== tabId) {
       activeTabId = tabId;
-      dispatch("change", tabId);
+      onchange?.(tabId);
     }
   }
 
-  function handleTabMouseDown(event: MouseEvent, tabId: string) {
+  function handleTabMouseDown(event: MouseEvent, tabId: string): void {
     if (!draggable && !reorderable) return;
 
     draggingTabId = tabId;
@@ -102,7 +123,7 @@
     event.preventDefault();
   }
 
-  function handleTabMouseMove(event: MouseEvent) {
+  function handleTabMouseMove(event: MouseEvent): void {
     if (!draggingTabId) return;
 
     const deltaX = Math.abs(event.clientX - dragStartX);
@@ -111,9 +132,9 @@
 
     if (!hasMoved) return;
 
-    // Check if cursor is within tab bar bounds
     const tabBarRect = tabBarElement?.getBoundingClientRect();
     let isInsideTabBar = false;
+
     if (tabBarRect) {
       if (isVertical) {
         isInsideTabBar =
@@ -131,22 +152,20 @@
     }
 
     if (reorderable && isInsideTabBar && !isDraggingOut) {
-      // Reordering mode
       isReordering = true;
       updateDropIndicator(isVertical ? event.clientY : event.clientX);
     } else if (draggable) {
-      // Dragging out mode
       if (!isDraggingOut) {
         isDraggingOut = true;
         isReordering = false;
         dropIndicatorIndex = -1;
-        dispatch("tabdragstart", {
+        ontabdragstart?.({
           tabId: draggingTabId,
           x: event.clientX,
           y: event.clientY,
         });
       }
-      dispatch("tabdragmove", {
+      ontabdragmove?.({
         tabId: draggingTabId,
         x: event.clientX,
         y: event.clientY,
@@ -154,13 +173,12 @@
     }
   }
 
-  function updateDropIndicator(clientPos: number) {
+  function updateDropIndicator(clientPos: number): void {
     if (!reorderTabId) return;
 
     const currentIndex = tabs.findIndex((t) => t.id === reorderTabId);
     let newIndex = tabs.length;
 
-    // Find the tab position based on cursor position
     for (let i = 0; i < tabs.length; i++) {
       const tabEl = tabElements.get(tabs[i].id);
       if (!tabEl) continue;
@@ -176,20 +194,15 @@
       }
     }
 
-    // Adjust index if dropping after current position
-    if (newIndex > currentIndex) {
-      dropIndicatorIndex = newIndex;
-    } else {
-      dropIndicatorIndex = newIndex;
-    }
+    dropIndicatorIndex = newIndex > currentIndex ? newIndex : newIndex;
   }
 
-  function handleTabMouseUp() {
+  function handleTabMouseUp(): void {
     document.removeEventListener("mousemove", handleTabMouseMove);
     document.removeEventListener("mouseup", handleTabMouseUp);
 
     if (isDraggingOut && draggingTabId) {
-      dispatch("tabdragend", { tabId: draggingTabId });
+      ontabdragend?.({ tabId: draggingTabId });
     } else if (isReordering && reorderTabId && dropIndicatorIndex !== -1) {
       const currentIndex = tabs.findIndex((t) => t.id === reorderTabId);
       if (
@@ -197,7 +210,6 @@
         currentIndex !== dropIndicatorIndex &&
         currentIndex !== dropIndicatorIndex - 1
       ) {
-        // Reorder tabs
         const newTabs = [...tabs];
         const [movedTab] = newTabs.splice(currentIndex, 1);
         const insertIndex =
@@ -205,10 +217,9 @@
             ? dropIndicatorIndex - 1
             : dropIndicatorIndex;
         newTabs.splice(insertIndex, 0, movedTab);
-        dispatch("reorder", { tabs: newTabs });
+        onreorder?.(newTabs);
       }
     } else if (draggingTabId && !isDraggingOut && !isReordering) {
-      // Simple click without drag - select the tab
       selectTab(draggingTabId);
     }
 
@@ -219,7 +230,10 @@
     dropIndicatorIndex = -1;
   }
 
-  function registerTabElement(element: HTMLElement, tabId: string) {
+  function registerTabElement(
+    element: HTMLElement,
+    tabId: string
+  ): { destroy: () => void } {
     tabElements.set(tabId, element);
     return {
       destroy() {
@@ -252,8 +266,8 @@
           class:dragging={(draggingTabId === tab.id && isDraggingOut) ||
             (reorderTabId === tab.id && isReordering)}
           use:registerTabElement={tab.id}
-          on:click={() => selectTab(tab.id)}
-          on:mousedown={(e) => handleTabMouseDown(e, tab.id)}
+          onclick={() => selectTab(tab.id)}
+          onmousedown={(e) => handleTabMouseDown(e, tab.id)}
         >
           <span class="tabs-title">{tab.title}</span>
         </button>
@@ -265,7 +279,9 @@
   {/if}
 
   <div class="tabs-content">
-    <slot {activeTabId} />
+    {#if children}
+      {@render children(activeTabId)}
+    {/if}
   </div>
 </div>
 
@@ -283,7 +299,6 @@
     height: 100%;
   }
 
-  /* Vertical layout */
   .tabs-widget.vertical {
     flex-direction: row;
   }
@@ -292,7 +307,6 @@
     flex-direction: row-reverse;
   }
 
-  /* Tab bar */
   .tabs-bar {
     display: flex;
     justify-content: center;
@@ -311,7 +325,6 @@
     border-left: 1px solid var(--tab-border-color);
   }
 
-  /* Tab button - horizontal */
   .tabs-button {
     box-sizing: border-box;
     display: flex;
@@ -332,7 +345,6 @@
       color 0.15s;
   }
 
-  /* Tab button - vertical */
   .tabs-widget.vertical .tabs-button {
     min-width: unset;
     width: 22px;
@@ -343,7 +355,6 @@
     border-top: 1px solid var(--tab-border-color);
   }
 
-  /* Tab title */
   .tabs-title {
     white-space: nowrap;
     color: inherit;
@@ -358,14 +369,12 @@
     transform: rotate(180deg);
   }
 
-  /* Separator logic - horizontal */
   .tabs-button:first-child,
   .tabs-button.active,
   .tabs-button.active + .tabs-button {
     border-left-color: transparent;
   }
 
-  /* Separator logic - vertical */
   .tabs-widget.vertical .tabs-button:first-child,
   .tabs-widget.vertical .tabs-button.active,
   .tabs-widget.vertical .tabs-button.active + .tabs-button {
@@ -386,7 +395,6 @@
     opacity: 0.5;
   }
 
-  /* Drop indicator - horizontal */
   .drop-indicator {
     width: 2px;
     height: 16px;
@@ -395,14 +403,12 @@
     flex-shrink: 0;
   }
 
-  /* Drop indicator - vertical */
   .tabs-widget.vertical .drop-indicator {
     width: 16px;
     height: 2px;
     margin: 0 3px;
   }
 
-  /* Tab content */
   .tabs-content {
     flex: 1;
     min-height: 0;

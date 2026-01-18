@@ -7,22 +7,19 @@
   ## Features
   - Hierarchical node display with unlimited nesting depth
   - Expand/collapse nodes with children
-  - Single node selection
+  - Single node selection with two-way binding
   - Optional icons for each node
   - Keyboard navigation (Enter/Space to select, Arrow keys to expand/collapse)
   - Double-click to toggle expand/collapse
   - Customizable indentation size
-  - Recursive component architecture
+  - Recursive component architecture with shared state via context
 
   ## Props
   - `nodes: TreeNode[]` - Array of root tree nodes
-  - `selectedId: string | null` - ID of currently selected node (default: null)
+  - `selectedId: string | null` - ID of currently selected node, supports binding (default: null)
   - `indentSize: number` - Pixels to indent each nesting level (default: 16)
-  - `depth: number` - Current depth level, used internally (default: 0)
-
-  ## Events
-  - `select` - Fired when node is selected: `{ node: TreeNode }`
-  - `toggle` - Fired when node is expanded/collapsed: `{ node: TreeNode, expanded: boolean }`
+  - `onselect: (node: TreeNode) => void` - Callback when node is selected
+  - `ontoggle: (node: TreeNode, expanded: boolean) => void` - Callback when node is expanded/collapsed
 
   ## TreeNode Interface
   ```typescript
@@ -44,11 +41,12 @@
         { id: "1.2", label: "Child 2" }
       ]}
     ]}
-    on:select={(e) => console.log('Selected:', e.detail.node)}
+    bind:selectedId
+    onselect={(node) => console.log('Selected:', node)}
   />
   ```
 -->
-<script lang="ts" context="module">
+<script lang="ts" module>
   export interface TreeNode {
     id: string;
     label: string;
@@ -56,76 +54,128 @@
     children?: TreeNode[];
     expanded?: boolean;
   }
+
+  export type ExpandedState = Record<string, boolean>;
 </script>
 
 <script lang="ts">
-  import { createEventDispatcher, onMount } from "svelte";
-  import { writable, type Writable } from "svelte/store";
-  import arrowRight from "../assets/icons/arrow_right.svg";
+  import { onMount } from "svelte";
+  import { get, writable, type Writable } from "svelte/store";
   import arrowDown from "../assets/icons/arrow_down.svg";
+  import arrowRight from "../assets/icons/arrow_right.svg";
+  import Tree from "./tree.svelte";
 
-  export let nodes: TreeNode[] = [];
-  export let selectedId: string | null = null;
-  export let indentSize: number = 16;
-  export let depth: number = 0;
-  // Internal prop for sharing expanded store across recursive calls
-  export let _expandedStore: Writable<Record<string, boolean>> | null = null;
+  interface Props {
+    nodes: TreeNode[];
+    selectedId?: string | null;
+    expandedState?: Record<string, boolean>;
+    indentSize?: number;
+    onselect?: (node: TreeNode) => void;
+    ontoggle?: (node: TreeNode, expanded: boolean) => void;
+    _depth?: number;
+    _expandedStore?: Writable<Record<string, boolean>>;
+  }
 
-  const dispatch = createEventDispatcher<{
-    select: { node: TreeNode };
-    toggle: { node: TreeNode; expanded: boolean };
-  }>();
+  let {
+    nodes = [],
+    selectedId = $bindable(null),
+    expandedState: externalExpandedState = $bindable({}),
+    indentSize = 16,
+    onselect,
+    ontoggle,
+    _depth = 0,
+    _expandedStore,
+  }: Props = $props();
 
-  $: isRoot = depth === 0;
+  // Compute isRoot once at initialization - _depth is a constant prop
+  const isRoot = _depth === 0;
 
-  // Root component creates the store
-  const localStore = writable<Record<string, boolean>>({});
-  $: expandedStore = _expandedStore !== null ? _expandedStore : localStore;
+  // Use store for shared expanded state across recursive components
+  // Pass store explicitly as prop to avoid context issues with conditional rendering
+  const expandedStore: Writable<Record<string, boolean>> = isRoot
+    ? writable<Record<string, boolean>>(externalExpandedState)
+    : _expandedStore!;
 
-  // Initialize expanded state from nodes (only at root level)
-  function initExpandedState(
-    nodeList: TreeNode[],
-    state: Record<string, boolean>
-  ): Record<string, boolean> {
-    nodeList.forEach((node) => {
-      if (node.expanded !== undefined && state[node.id] === undefined) {
-        state[node.id] = node.expanded;
-      }
-      if (node.children) {
-        initExpandedState(node.children, state);
+  // Local reactive copy of expanded state for this component
+  let expandedState: Record<string, boolean> = $state(get(expandedStore));
+
+  // Subscribe to store changes on mount
+  onMount(() => {
+    const unsubscribe = expandedStore.subscribe((value) => {
+      expandedState = value;
+      if (isRoot) {
+        externalExpandedState = value;
       }
     });
-    return state;
+    return unsubscribe;
+  });
+
+  // Sync external state changes to internal store (only for root)
+  $effect(() => {
+    if (isRoot && externalExpandedState) {
+      const currentStore = get(expandedStore);
+      if (
+        JSON.stringify(currentStore) !== JSON.stringify(externalExpandedState)
+      ) {
+        expandedStore.set(externalExpandedState);
+      }
+    }
+  });
+
+  // Initialize expanded state from nodes
+  function initExpandedState(nodeList: TreeNode[]): void {
+    expandedStore.update((current) => {
+      const updates: Record<string, boolean> = {};
+      function traverse(list: TreeNode[]): void {
+        for (const node of list) {
+          if (node.expanded !== undefined && current[node.id] === undefined) {
+            updates[node.id] = node.expanded;
+          }
+          if (node.children) {
+            traverse(node.children);
+          }
+        }
+      }
+      traverse(nodeList);
+      return Object.keys(updates).length > 0
+        ? { ...current, ...updates }
+        : current;
+    });
   }
 
   onMount(() => {
     if (isRoot) {
-      expandedStore.update((state) => initExpandedState(nodes, state));
+      initExpandedState(nodes);
     }
   });
 
-  // Also react to nodes changes
-  $: if (isRoot && nodes) {
-    expandedStore.update((state) => initExpandedState(nodes, { ...state }));
-  }
+  // React to nodes changes
+  $effect(() => {
+    if (isRoot && nodes) {
+      initExpandedState(nodes);
+    }
+  });
 
   function hasChildren(node: TreeNode): boolean {
     return !!node.children && node.children.length > 0;
   }
 
+  function isExpanded(nodeId: string): boolean {
+    return expandedState[nodeId] ?? false;
+  }
+
   function toggleNode(node: TreeNode): void {
     if (!hasChildren(node)) return;
-
-    expandedStore.update((state) => {
-      const newExpanded = !state[node.id];
-      dispatch("toggle", { node, expanded: newExpanded });
-      return { ...state, [node.id]: newExpanded };
+    expandedStore.update((current) => {
+      const newExpanded = !current[node.id];
+      ontoggle?.(node, newExpanded);
+      return { ...current, [node.id]: newExpanded };
     });
   }
 
   function selectNode(node: TreeNode): void {
     selectedId = node.id;
-    dispatch("select", { node });
+    onselect?.(node);
   }
 
   function handleKeyDown(event: KeyboardEvent, node: TreeNode): void {
@@ -135,14 +185,14 @@
     } else if (
       event.key === "ArrowRight" &&
       hasChildren(node) &&
-      !$expandedStore[node.id]
+      !isExpanded(node.id)
     ) {
       event.preventDefault();
       toggleNode(node);
     } else if (
       event.key === "ArrowLeft" &&
       hasChildren(node) &&
-      $expandedStore[node.id]
+      isExpanded(node.id)
     ) {
       event.preventDefault();
       toggleNode(node);
@@ -153,48 +203,36 @@
     event.stopPropagation();
     toggleNode(node);
   }
-
-  function forwardSelect(event: CustomEvent<{ node: TreeNode }>) {
-    dispatch("select", event.detail);
-  }
-
-  function forwardToggle(
-    event: CustomEvent<{ node: TreeNode; expanded: boolean }>
-  ) {
-    dispatch("toggle", event.detail);
-  }
 </script>
 
 <div class="tree" class:is-root={isRoot} role={isRoot ? "tree" : "group"}>
   {#each nodes as node (node.id)}
     <div class="tree-node">
-      <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
       <div
         class="tree-item"
         class:selected={selectedId === node.id}
-        style="padding-left: {depth * indentSize + 4}px;"
+        style="padding-left: {_depth * indentSize + 4}px;"
         data-node-id={node.id}
-        on:click={() => selectNode(node)}
-        on:dblclick={() => toggleNode(node)}
-        on:keydown={(e) => handleKeyDown(e, node)}
+        onclick={() => selectNode(node)}
+        ondblclick={() => toggleNode(node)}
+        onkeydown={(e) => handleKeyDown(e, node)}
         role="treeitem"
         tabindex="0"
-        aria-expanded={hasChildren(node)
-          ? ($expandedStore[node.id] ?? false)
-          : undefined}
+        aria-expanded={hasChildren(node) ? isExpanded(node.id) : undefined}
         aria-selected={selectedId === node.id}
       >
-        <!-- svelte-ignore a11y-no-static-element-interactions -->
         <span
           class="tree-arrow"
           class:has-children={hasChildren(node)}
-          class:expanded={$expandedStore[node.id]}
-          on:click={(e) => handleArrowClick(e, node)}
-          on:keydown={(e) => e.key === "Enter" && toggleNode(node)}
+          class:expanded={isExpanded(node.id)}
+          onclick={(e) => handleArrowClick(e, node)}
+          onkeydown={(e) => e.key === "Enter" && toggleNode(node)}
+          role="button"
+          tabindex="-1"
         >
           {#if hasChildren(node)}
             <img
-              src={$expandedStore[node.id] ? arrowDown : arrowRight}
+              src={isExpanded(node.id) ? arrowDown : arrowRight}
               alt=""
               class="arrow-icon"
             />
@@ -210,15 +248,15 @@
         <span class="tree-label disable-selection">{node.label}</span>
       </div>
 
-      {#if hasChildren(node) && $expandedStore[node.id]}
-        <svelte:self
-          nodes={node.children}
-          {selectedId}
+      {#if hasChildren(node) && isExpanded(node.id)}
+        <Tree
+          nodes={node.children!}
+          bind:selectedId
           {indentSize}
-          depth={depth + 1}
+          {onselect}
+          {ontoggle}
+          _depth={_depth + 1}
           _expandedStore={expandedStore}
-          on:select={forwardSelect}
-          on:toggle={forwardToggle}
         />
       {/if}
     </div>

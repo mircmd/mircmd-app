@@ -7,12 +7,15 @@ use uuid::Uuid;
 pub fn get_node_data(state: State<'_, Mutex<AppState>>, node_id: String) -> Vec<u8> {
     let app = state.lock().unwrap();
 
-    app.project
+    let data = app
+        .project
         .root_node
         .find_by_id(&Uuid::parse_str(&node_id).unwrap())
         .unwrap()
         .data
-        .clone()
+        .clone();
+
+    data
 }
 
 #[tauri::command]

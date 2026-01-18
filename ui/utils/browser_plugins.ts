@@ -1,8 +1,10 @@
 // Utility for loading browser-side WASM Component Model plugins
 // Uses jco-transpiled modules with instantiation mode
 
+import type { IconEntry, IconPlugin } from './icon_store';
+
 export interface ProgramPlugin {
-  render: () => string;
+  render: (data: Uint8Array) => string;
 }
 
 const PLUGIN_BASE_URL = 'plugin://localhost';
@@ -46,8 +48,7 @@ function createWasiShims() {
   };
 }
 
-export async function loadMoleculeVisualizer(): Promise<ProgramPlugin> {
-  const pluginPath = 'mircmd-dev/chemistry-molecular-visualizer';
+export async function loadBrowserPlugin(pluginPath: string): Promise<ProgramPlugin> {
   const moduleUrl = `${PLUGIN_BASE_URL}/${pluginPath}/plugin.js`;
 
   // Load the instantiation module
@@ -69,5 +70,24 @@ export async function loadMoleculeVisualizer(): Promise<ProgramPlugin> {
 
   return {
     render: instance.render,
+  };
+}
+
+export async function loadIconPlugin(pluginPath: string): Promise<IconPlugin> {
+  const pluginBaseUrl = `${PLUGIN_BASE_URL}/${pluginPath}`;
+  const moduleUrl = `${pluginBaseUrl}/plugin.js`;
+
+  const pluginModule = await import(moduleUrl);
+
+  // Icon plugins return a map of kind -> relative icon path
+  const iconsMap = pluginModule.instantiate() as Record<string, string>;
+
+  return {
+    icons: (): IconEntry[] => {
+      return Object.entries(iconsMap).map(([kind, relativePath]) => ({
+        kind,
+        icon: `${pluginBaseUrl}/${relativePath}`,
+      }));
+    },
   };
 }

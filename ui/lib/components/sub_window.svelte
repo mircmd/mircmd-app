@@ -386,7 +386,7 @@
 
   .sub-window-content {
     flex: 1;
-    overflow: auto;
+    overflow: hidden;
     min-height: 0;
     background-color: #ffffff;
   }

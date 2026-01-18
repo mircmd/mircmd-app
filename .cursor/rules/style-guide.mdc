@@ -3,7 +3,9 @@ alwaysApply: true
 ---
 
 - Use PascalCase for class names.
-- Use snake_case for packages, modules, functions, and variable names.
+- Use snake_case for packages, modules, functions, and variable names for Rust code.
+- Use snake_case for packages and modules names for TypeScript code.
+- Use camelCase for functions and variable for TypeScript code.
 - Sort imports alphabetically.
 - Keep functions under 25 lines when possible.
 - Write all comments in English.

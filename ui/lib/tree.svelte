@@ -61,8 +61,8 @@
 <script lang="ts">
   import { createEventDispatcher, onMount } from "svelte";
   import { writable, type Writable } from "svelte/store";
-  import arrowRight from "../../assets/icons/arrow_right.svg";
-  import arrowDown from "../../assets/icons/arrow_down.svg";
+  import arrowRight from "../assets/icons/arrow_right.svg";
+  import arrowDown from "../assets/icons/arrow_down.svg";
 
   export let nodes: TreeNode[] = [];
   export let selectedId: string | null = null;
@@ -173,6 +173,7 @@
         class="tree-item"
         class:selected={selectedId === node.id}
         style="padding-left: {depth * indentSize + 4}px;"
+        data-node-id={node.id}
         on:click={() => selectNode(node)}
         on:dblclick={() => toggleNode(node)}
         on:keydown={(e) => handleKeyDown(e, node)}

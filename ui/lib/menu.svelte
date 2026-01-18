@@ -38,7 +38,7 @@
 
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
-  import arrowRightIcon from "../../assets/icons/arrow_right.svg";
+  import arrowRightIcon from "../assets/icons/arrow_right.svg";
   import Menu from "./menu.svelte";
 
   interface Props {

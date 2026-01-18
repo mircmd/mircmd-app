@@ -1,10 +1,30 @@
+<!--
+  @component Explorer
+
+  Node explorer dock panel that displays project structure as a hierarchical tree.
+  Based on the Tree component, it provides navigation and interaction with loaded nodes.
+
+  ## Features
+  - Displays project nodes in a tree structure with icons
+  - Context menu on right-click with actions:
+    - Import files into selected node (or root if none selected)
+    - Export node data
+    - Open node with available browser plugins
+  - Automatic loading of icon plugins for node visualization
+  - Dynamic plugin discovery for "Open with..." submenu
+
+  ## Public API
+  - `refresh()` - Reloads project nodes from the core
+-->
 <script lang="ts">
   import { onMount } from "svelte";
-  import Menu from "../lib/components/menu.svelte";
-  import type { MenuItem } from "../lib/components/menu.svelte";
-  import Tree from "../lib/components/tree.svelte";
-  import type { TreeNode } from "../lib/components/tree.svelte";
+
   import { getProjectRootNode, type ProjectNode } from "../app";
+  import Menu from "../lib/menu.svelte";
+  import type { MenuItem } from "../lib/menu.svelte";
+  import Tree from "../lib/tree.svelte";
+  import type { TreeNode } from "../lib/tree.svelte";
+  import { getWindowManager } from "../lib/window_manager/window_manager_context";
   import { loadBrowserPlugin, loadIconPlugin } from "../utils/browser_plugins";
   import { icon_store } from "../utils/icon_store";
   import {
@@ -14,144 +34,24 @@
     type PluginInfo,
   } from "../utils/plugins";
   import { getNodeData, importFiles } from "../utils/project";
-  import { window_store } from "../utils/window_store";
 
   let nodes: TreeNode[] = $state([]);
   let selectedId: string | null = $state(null);
+  let programPlugins: PluginInfo[] = $state([]);
 
-  // Context menu state
   let contextMenuVisible: boolean = $state(false);
   let contextMenuX: number = $state(0);
   let contextMenuY: number = $state(0);
   let contextMenuNode: TreeNode | null = $state(null);
 
-  // Available program plugins
-  let programPlugins: PluginInfo[] = $state([]);
-
-  function getIconForKind(kind: string): string {
-    return icon_store.get_icon(kind);
-  }
-
-  function convertProjectNodeToTreeNode(node: ProjectNode): TreeNode {
+  function convertToTreeNode(node: ProjectNode): TreeNode {
     return {
       id: node.id,
       label: node.name,
-      icon: getIconForKind(node.kind),
+      icon: icon_store.get_icon(node.kind),
       expanded: false,
-      children: node.children.map(convertProjectNodeToTreeNode),
+      children: node.children.map(convertToTreeNode),
     };
-  }
-
-  async function loadProjectNodes(): Promise<void> {
-    const rootNode = await getProjectRootNode();
-    nodes = rootNode.children.map(convertProjectNodeToTreeNode);
-  }
-
-  async function loadProgramPlugins(): Promise<void> {
-    const allPlugins = await getPlugins();
-    programPlugins = allPlugins.filter(
-      (p) =>
-        p.manifest.target === PluginTarget.Ui &&
-        p.manifest.type === PluginType.Program
-    );
-  }
-
-  async function loadIconPlugins(): Promise<void> {
-    const allPlugins = await getPlugins();
-    const iconPlugins = allPlugins.filter(
-      (p) =>
-        p.manifest.target === PluginTarget.Ui &&
-        p.manifest.type === PluginType.Icons
-    );
-
-    for (const pluginInfo of iconPlugins) {
-      try {
-        const plugin = await loadIconPlugin(pluginInfo.path);
-        const icons = plugin.icons();
-        icon_store.add_icons(icons);
-      } catch (e) {
-        console.error(`Failed to load icon plugin ${pluginInfo.path}:`, e);
-      }
-    }
-    icon_store.set_loaded(true);
-  }
-
-  export function refresh(): void {
-    loadProjectNodes();
-  }
-
-  onMount(() => {
-    loadIconPlugins().then(() => {
-      loadProjectNodes();
-    });
-    loadProgramPlugins();
-  });
-
-  async function openWithPlugin(pluginInfo: PluginInfo): Promise<void> {
-    if (!contextMenuNode) return;
-
-    const node_id = contextMenuNode.id;
-    const node_label = contextMenuNode.label;
-    const node_icon = contextMenuNode.icon;
-    const data = await getNodeData(node_id);
-    const plugin = await loadBrowserPlugin(pluginInfo.path);
-    const html = plugin.render(data);
-
-    window_store.add_window(node_label, pluginInfo.path, html, node_icon);
-  }
-
-  function buildOpenWithSubmenu(): MenuItem[] {
-    return programPlugins.map((pluginInfo) => ({
-      id: `open_with_${pluginInfo.manifest.metadata.id}`,
-      label: pluginInfo.manifest.metadata.name,
-      action: () => openWithPlugin(pluginInfo),
-    }));
-  }
-
-  function handleSelect(event: CustomEvent<{ node: TreeNode }>) {
-    selectedId = event.detail.node.id;
-  }
-
-  function handleToggle(
-    event: CustomEvent<{ node: TreeNode; expanded: boolean }>
-  ) {
-    // Can be extended to handle toggle events
-  }
-
-  function handleContextMenu(event: MouseEvent): void {
-    event.preventDefault();
-
-    const target = event.target as HTMLElement;
-    const treeItem = target.closest(".tree-item");
-    if (!treeItem) return;
-
-    const nodeId = findNodeIdFromElement(treeItem, nodes);
-    if (!nodeId) return;
-
-    contextMenuNode = findNodeById(nodeId, nodes);
-    contextMenuX = event.clientX;
-    contextMenuY = event.clientY;
-    contextMenuVisible = true;
-  }
-
-  function findNodeIdFromElement(
-    element: Element,
-    nodeList: TreeNode[]
-  ): string | null {
-    const label = element.querySelector(".tree-label")?.textContent;
-    if (!label) return null;
-
-    function search(nodes: TreeNode[]): string | null {
-      for (const node of nodes) {
-        if (node.label === label) return node.id;
-        if (node.children) {
-          const found = search(node.children);
-          if (found) return found;
-        }
-      }
-      return null;
-    }
-    return search(nodeList);
   }
 
   function findNodeById(id: string, nodeList: TreeNode[]): TreeNode | null {
@@ -165,19 +65,94 @@
     return null;
   }
 
+  async function loadPlugins(): Promise<void> {
+    const allPlugins = await getPlugins();
+
+    programPlugins = allPlugins.filter(
+      (p) =>
+        p.manifest.target === PluginTarget.Ui &&
+        p.manifest.type === PluginType.Program
+    );
+
+    const iconPlugins = allPlugins.filter(
+      (p) =>
+        p.manifest.target === PluginTarget.Ui &&
+        p.manifest.type === PluginType.Icons
+    );
+
+    for (const pluginInfo of iconPlugins) {
+      try {
+        const plugin = await loadIconPlugin(pluginInfo.path);
+        icon_store.add_icons(plugin.icons());
+      } catch (e) {
+        console.error(`Failed to load icon plugin ${pluginInfo.path}:`, e);
+      }
+    }
+    icon_store.set_loaded(true);
+  }
+
+  async function loadProjectNodes(): Promise<void> {
+    const rootNode = await getProjectRootNode();
+    nodes = rootNode.children.map(convertToTreeNode);
+  }
+
+  async function openWithPlugin(pluginInfo: PluginInfo): Promise<void> {
+    if (!contextMenuNode) return;
+
+    const { id, label, icon } = contextMenuNode;
+    const data = await getNodeData(id);
+    const plugin = await loadBrowserPlugin(pluginInfo.path);
+    const html = plugin.render(data);
+
+    getWindowManager().addWindow(label, pluginInfo.path, html, icon);
+  }
+
+  function buildOpenWithSubmenu(): MenuItem[] {
+    return programPlugins.map((pluginInfo) => ({
+      id: `open_with_${pluginInfo.manifest.metadata.id}`,
+      label: pluginInfo.manifest.metadata.name,
+      action: () => openWithPlugin(pluginInfo),
+    }));
+  }
+
+  function handleSelect(event: CustomEvent<{ node: TreeNode }>): void {
+    selectedId = event.detail.node.id;
+  }
+
+  function handleContextMenu(event: MouseEvent): void {
+    event.preventDefault();
+
+    const target = event.target as HTMLElement;
+    const treeItem = target.closest(".tree-item");
+    if (!treeItem) return;
+
+    const nodeId = treeItem.getAttribute("data-node-id");
+    if (!nodeId) return;
+
+    contextMenuNode = findNodeById(nodeId, nodes);
+    contextMenuX = event.clientX;
+    contextMenuY = event.clientY;
+    contextMenuVisible = true;
+  }
+
   function handleMenuClose(): void {
     contextMenuVisible = false;
     contextMenuNode = null;
   }
 
-  // Context menu items (reactive to update open_with submenu)
+  export function refresh(): void {
+    loadProjectNodes();
+  }
+
+  onMount(() => {
+    loadPlugins().then(loadProjectNodes);
+  });
+
   let contextMenuItems: MenuItem[] = $derived([
     {
       id: "import_file",
       label: "Import files",
-      action: () => {
-        importFiles(contextMenuNode?.id ?? null);
-      },
+      action: () => importFiles(contextMenuNode?.id ?? null),
     },
     {
       id: "export",
@@ -195,14 +170,13 @@
   ]);
 </script>
 
-<!-- svelte-ignore a11y_interactive_supports_focus -->
-<div class="explorer-tree" on:contextmenu={handleContextMenu} role="tree">
-  <Tree
-    {nodes}
-    {selectedId}
-    on:select={handleSelect}
-    on:toggle={handleToggle}
-  />
+<div
+  class="explorer-tree"
+  oncontextmenu={handleContextMenu}
+  role="tree"
+  tabindex="-1"
+>
+  <Tree {nodes} {selectedId} on:select={handleSelect} />
 </div>
 
 <Menu
@@ -210,7 +184,7 @@
   x={contextMenuX}
   y={contextMenuY}
   bind:visible={contextMenuVisible}
-  on:close={handleMenuClose}
+  onclose={handleMenuClose}
 />
 
 <style>

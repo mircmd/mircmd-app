@@ -40,8 +40,8 @@ impl FileImporterPlugin {
                 let raw_node = serde_json::from_slice::<RawProjectNode>(&bytes)?;
                 Ok(ProjectNode::from(raw_node))
             }
-            Ok(Err(msg)) => Err(anyhow::anyhow!("failed to load file: {}", msg)),
-            Err(e) => Err(anyhow::anyhow!("execution error: {}", e)),
+            Ok(Err(msg)) => Err(anyhow::anyhow!("{}", msg)),
+            Err(e) => Err(anyhow::anyhow!("{}", e)),
         }
     }
 }

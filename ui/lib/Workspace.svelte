@@ -32,33 +32,112 @@
   let isLeftEmpty = $state(true);
   let isRightEmpty = $state(true);
   let isBottomEmpty = $state(true);
+  let leftWidth = $state(200);
+  let rightWidth = $state(200);
+  let bottomHeight = $state(150);
 
   export function addWidgetToDock(area: "left" | "right" | "bottom", content: Snippet) {
     if (area === "left") leftDock.addWidget(content);
     else if (area === "right") rightDock.addWidget(content);
     else if (area === "bottom") bottomDock.addWidget(content);
   }
+
+  let resizeOffset = { x: 0, y: 0 };
+
+  let resizingArea = $state<"left" | "right" | "bottom" | null>(null);
+  let isInteracting = $derived(resizingArea !== null);
+
+  $effect(() => {
+    if (isInteracting) {
+      attachGlobalListeners();
+    } else {
+      detachGlobalListeners();
+    }
+  });
+
+  // Global event listeners management
+  let listenersAttached = false;
+
+  function attachGlobalListeners(): void {
+    if (listenersAttached) return;
+    document.addEventListener("mousemove", onGlobalMouseMove);
+    document.addEventListener("mouseup", onGlobalMouseUp);
+    listenersAttached = true;
+  }
+
+  function detachGlobalListeners(): void {
+    if (!listenersAttached) return;
+    document.removeEventListener("mousemove", onGlobalMouseMove);
+    document.removeEventListener("mouseup", onGlobalMouseUp);
+    listenersAttached = false;
+  }
+
+  // Global mouse event handlers
+  function onGlobalMouseMove(event: MouseEvent): void {
+    const posX = event.clientX - resizeOffset.x;
+    const posY = event.clientY - resizeOffset.y;
+    resizeOffset = {
+      x: event.clientX,
+      y: event.clientY,
+    };
+    if (resizingArea === "left") {
+      leftWidth += posX;
+    } else if (resizingArea === "right") {
+      rightWidth -= posX;
+    } else if (resizingArea === "bottom") {
+      bottomHeight -= posY;
+    }
+  }
+
+  function onGlobalMouseUp(): void {
+    resizingArea = null;
+  }
+
+  function startResizing(event: MouseEvent, area: "left" | "right" | "bottom") {
+    if (event.button !== 0) return;
+
+    resizingArea = area;
+    resizeOffset = {
+      x: event.clientX,
+      y: event.clientY,
+    };
+  }
 </script>
 
 <div
   class="workspace"
-  style:--left-width={isLeftEmpty ? "0px" : "200px"}
-  style:--right-width={isRightEmpty ? "0px" : "200px"}
-  style:--bottom-height={isBottomEmpty ? "0px" : "150px"}
+  style:--left-width={isLeftEmpty ? "0px" : leftWidth + "px"}
+  style:--right-width={isRightEmpty ? "0px" : rightWidth + "px"}
+  style:--bottom-height={isBottomEmpty ? "0px" : bottomHeight + "px"}
 >
   <div class="left-dock" class:hidden={isLeftEmpty}>
     <Layout bind:this={leftDock} bind:isEmpty={isLeftEmpty} orientation="vertical" />
-    <div class="resize-handle resize-handle-vertical" aria-hidden="true"></div>
+    <div
+      class="resize-handle resize-handle-vertical"
+      class:resizing={resizingArea === "left"}
+      onmousedown={(e) => startResizing(e, "left")}
+      aria-hidden="true"
+    ></div>
   </div>
   <div class="central-content">
     {@render centralContent()}
   </div>
   <div class="bottom-dock" class:hidden={isBottomEmpty}>
-    <div class="resize-handle resize-handle-horizontal" aria-hidden="true"></div>
+    <div
+      class="resize-handle resize-handle-horizontal"
+      class:resizing={resizingArea === "bottom"}
+      onmousedown={(e) => startResizing(e, "bottom")}
+      aria-hidden="true"
+    ></div>
     <Layout bind:this={bottomDock} bind:isEmpty={isBottomEmpty} orientation="horizontal" />
   </div>
   <div class="right-dock" class:hidden={isRightEmpty}>
-    <div class="resize-handle resize-handle-vertical" aria-hidden="true"></div>
+    <div
+      class="resize-handle resize-handle-vertical"
+      class:resizing={resizingArea === "right"}
+      onmousedown={(e) => startResizing(e, "right")}
+      aria-hidden="true"
+    ></div>
     <Layout bind:this={rightDock} bind:isEmpty={isRightEmpty} orientation="vertical" />
   </div>
 </div>
@@ -110,10 +189,10 @@
     position: absolute;
     z-index: 1;
     background: transparent;
-    /* background-color: #3b82f655; */
   }
 
-  .resize-handle:hover {
+  .resize-handle:hover,
+  .resize-handle.resizing {
     background-color: #3b82f6;
     transition: background-color 0.25s ease;
   }
@@ -133,12 +212,12 @@
   }
 
   .left-dock .resize-handle {
-    right: calc(100% - var(--right-width));
+    right: calc(100% - var(--left-width));
     transform: translateX(2px);
   }
 
   .right-dock .resize-handle {
-    left: calc(100% - var(--left-width));
+    left: calc(100% - var(--right-width));
     transform: translateX(-2px);
   }
 

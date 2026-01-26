@@ -94,6 +94,7 @@
   }
 
   function startResizing(event: MouseEvent, area: "left" | "right" | "bottom") {
+    event.preventDefault();
     if (event.button !== 0) return;
 
     resizingArea = area;

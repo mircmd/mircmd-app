@@ -91,8 +91,8 @@
   }
 
   function processDragWindow(event: MouseEvent) {
+    event.preventDefault();
     if (draggingWindow) {
-      // event.preventDefault();
       draggingWindow.pos = [event.clientX - dragOffset.x, event.clientY - dragOffset.y];
     }
   }
@@ -129,6 +129,8 @@
   }
 
   function startDragging(event: MouseEvent, window: Window) {
+    event.preventDefault();
+
     if (event.button !== 0) return;
     if (window.state !== "normal") return;
 
@@ -256,7 +258,7 @@
 
 <div class="window-manager">
   {#each windows as win (win.id)}
-      {@render window(win)}
+    {@render window(win)}
   {/each}
 </div>
 

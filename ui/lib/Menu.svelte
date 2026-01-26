@@ -180,7 +180,6 @@
     align-items: center;
     justify-content: space-between;
     padding: 4px 8px;
-    cursor: pointer;
     color: #1a1a1a;
     border-radius: 6px;
     height: 22px;

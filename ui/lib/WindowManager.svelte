@@ -301,7 +301,6 @@
     padding: 0 4px;
     background: linear-gradient(180deg, #f8f8f8 0%, #e8e8e8 100%);
     border-bottom: 1px solid #c0c0c0;
-    cursor: move;
     user-select: none;
     flex-shrink: 0;
   }
@@ -355,7 +354,6 @@
     border: none;
     border-radius: 5px;
     background-color: transparent;
-    cursor: default;
     transition: background-color 0.1s ease;
   }
 
@@ -400,10 +398,6 @@
     border-bottom: none;
   }
 
-  .window.minimized .window-title-bar {
-    cursor: default;
-  }
-
   /* Maximized window */
   .window.maximized {
     position: absolute;
@@ -413,9 +407,5 @@
     border-radius: 0;
     border: none;
     box-shadow: none;
-  }
-
-  .window.maximized .window-title-bar {
-    cursor: default;
   }
 </style>

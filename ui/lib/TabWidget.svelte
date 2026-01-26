@@ -245,7 +245,6 @@
     color: inherit;
     font: inherit;
     background: var(--tab-bg);
-    cursor: pointer;
     transition:
       background-color 0.15s,
       color 0.15s;
@@ -315,7 +314,6 @@
     border: none;
     border-radius: 2px;
     background: transparent;
-    cursor: pointer;
     opacity: 0.6;
   }
 

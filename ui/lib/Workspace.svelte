@@ -48,14 +48,17 @@
 >
   <div class="left-dock" class:hidden={isLeftEmpty}>
     <Layout bind:this={leftDock} bind:isEmpty={isLeftEmpty} orientation="vertical" />
+    <div class="resize-handle resize-handle-vertical" aria-hidden="true"></div>
   </div>
   <div class="central-content">
     {@render centralContent()}
   </div>
   <div class="bottom-dock" class:hidden={isBottomEmpty}>
+    <div class="resize-handle resize-handle-horizontal" aria-hidden="true"></div>
     <Layout bind:this={bottomDock} bind:isEmpty={isBottomEmpty} orientation="horizontal" />
   </div>
   <div class="right-dock" class:hidden={isRightEmpty}>
+    <div class="resize-handle resize-handle-vertical" aria-hidden="true"></div>
     <Layout bind:this={rightDock} bind:isEmpty={isRightEmpty} orientation="vertical" />
   </div>
 </div>
@@ -71,36 +74,28 @@
     flex: 1;
     min-height: 0;
     min-width: 0;
+    position: relative;
   }
 
   .left-dock {
     grid-area: left;
     overflow: hidden;
     border-right: 1px solid #dadada;
-  }
-
-  .left-dock.hidden {
-    border-right: none;
+    z-index: 3;
   }
 
   .right-dock {
     grid-area: right;
     overflow: hidden;
     border-left: 1px solid #dadada;
-  }
-
-  .right-dock.hidden {
-    border-left: none;
+    z-index: 3;
   }
 
   .bottom-dock {
     grid-area: bottom;
     overflow: hidden;
     border-top: 1px solid #dadada;
-  }
-
-  .bottom-dock.hidden {
-    border-top: none;
+    z-index: 2;
   }
 
   .central-content {
@@ -109,5 +104,46 @@
     background-color: #ffffff;
     min-width: 0;
     min-height: 0;
+  }
+
+  .resize-handle {
+    position: absolute;
+    z-index: 1;
+    background: transparent;
+    /* background-color: #3b82f655; */
+  }
+
+  .resize-handle:hover {
+    background-color: #3b82f6;
+    transition: background-color 0.25s ease;
+  }
+
+  .resize-handle-vertical {
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    cursor: col-resize;
+  }
+
+  .resize-handle-horizontal {
+    left: 0;
+    right: 0;
+    height: 4px;
+    cursor: row-resize;
+  }
+
+  .left-dock .resize-handle {
+    right: calc(100% - var(--right-width));
+    transform: translateX(2px);
+  }
+
+  .right-dock .resize-handle {
+    left: calc(100% - var(--left-width));
+    transform: translateX(-2px);
+  }
+
+  .bottom-dock .resize-handle {
+    top: calc(100% - var(--bottom-height));
+    transform: translateY(-2px);
   }
 </style>

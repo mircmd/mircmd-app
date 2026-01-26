@@ -23,6 +23,6 @@ impl FileManager {
             }
         }
 
-        Err(anyhow::anyhow!("No importers can handle this file"))
+        Err(anyhow::anyhow!("No importers can handle this file."))
     }
 }

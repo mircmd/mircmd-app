@@ -5,18 +5,18 @@ use uuid::Uuid;
 pub struct ProjectNode {
     pub id: Uuid,
     pub name: String,
-    pub kind: String,
-    // #[serde(skip)]
+    pub r#type: String,
+    #[serde(skip)]
     pub data: Vec<u8>,
     pub children: Vec<ProjectNode>,
 }
 
 impl ProjectNode {
-    pub fn new(name: &str, kind: &str) -> Self {
+    pub fn new(name: &str, r#type: &str) -> Self {
         Self {
             id: Uuid::now_v7(),
             name: name.to_string(),
-            kind: kind.to_string(),
+            r#type: r#type.to_string(),
             data: Vec::new(),
             children: Vec::new(),
         }
@@ -59,7 +59,7 @@ impl ProjectNode {
 #[derive(Debug, Deserialize)]
 pub struct RawProjectNode {
     pub name: String,
-    pub kind: String,
+    pub r#type: String,
     pub data: Vec<u8>,
     #[serde(default)]
     pub children: Vec<RawProjectNode>,
@@ -70,7 +70,7 @@ impl From<RawProjectNode> for ProjectNode {
         Self {
             id: Uuid::now_v7(),
             name: raw.name,
-            kind: raw.kind,
+            r#type: raw.r#type,
             data: raw.data,
             children: raw.children.into_iter().map(ProjectNode::from).collect(),
         }

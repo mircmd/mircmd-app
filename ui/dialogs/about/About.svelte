@@ -1,62 +1,56 @@
 <script lang="ts">
-  import AppLogo from "./assets/app.png";
-  import LICENSE from "./assets/LICENSE.txt?raw";
-  import Tabs from "./lib/tabs.svelte";
-
-  const tabs = [
-    { id: "about", title: "About" },
-    { id: "authors", title: "Authors" },
-    { id: "license", title: "License" },
-  ];
+  import AppLogo from "../../assets/app.png";
+  import LICENSE from "../../assets/LICENSE.txt?raw";
+  import TabWidget from "../../lib/TabWidget.svelte";
 </script>
 
-<main>
+{#snippet aboutTab()}
+  <div class="about-content enable-selection">
+    <p>A modern, powerful graphical user interface for molecular structure modeling.</p>
+    <div class="contact-links">
+      <span>Home Page:</span>
+      <a href="https://mircmd.com/">https://mircmd.com/</a>
+      <span>Telegram:</span>
+      <a href="https://t.me/mir_commander">https://t.me/mir_commander</a>
+    </div>
+  </div>
+{/snippet}
+
+{#snippet authorsTab()}
+  <div class="authors enable-selection">
+    <div class="author">
+      <p>Yury V. Vishnevskiy</p>
+      <a href="mailto:yu.v.vishnevskiy@gmail.com">yu.v.vishnevskiy@gmail.com</a>
+    </div>
+    <div class="author">
+      <p>Valery V. Vishnevskiy</p>
+      <a href="mailto:v.v.vishnevskiy@gmail.com">v.v.vishnevskiy@gmail.com</a>
+    </div>
+  </div>
+{/snippet}
+
+{#snippet licenseTab()}
+  <div class="license enable-selection">
+    <pre>{LICENSE}</pre>
+  </div>
+{/snippet}
+
+<main class="disable-selection">
   <div class="header">
     <div>
       <img src={AppLogo} class="logo" alt="Mir Commander Logo" />
     </div>
-    <div class="name disable-selection">Mir Commander</div>
-    <div class="version disable-selection">Version {__APP_VERSION__}</div>
+    <div class="name">Mir Commander</div>
+    <div class="version">Version {__APP_VERSION__}</div>
   </div>
   <div class="tab-container">
-    <Tabs {tabs} activeTabId="about">
-      {#snippet children(activeTabId)}
-        {#if activeTabId === "about"}
-          <div class="about-content">
-            <p>
-              A modern, powerful graphical user interface for molecular
-              structure modeling.
-            </p>
-            <div class="contact-links">
-              <span>Home Page:</span>
-              <a href="https://mircmd.com/">https://mircmd.com/</a>
-              <span>Telegram:</span>
-              <a href="https://t.me/mir_commander">https://t.me/mir_commander</a
-              >
-            </div>
-          </div>
-        {:else if activeTabId === "authors"}
-          <div class="authors">
-            <div class="author">
-              <p>Yury V. Vishnevskiy</p>
-              <a href="mailto:yu.v.vishnevskiy@gmail.com"
-                >yu.v.vishnevskiy@gmail.com</a
-              >
-            </div>
-            <div class="author">
-              <p>Valery V. Vishnevskiy</p>
-              <a href="mailto:v.v.vishnevskiy@gmail.com"
-                >v.v.vishnevskiy@gmail.com</a
-              >
-            </div>
-          </div>
-        {:else if activeTabId === "license"}
-          <div class="license">
-            <pre>{LICENSE}</pre>
-          </div>
-        {/if}
-      {/snippet}
-    </Tabs>
+    <TabWidget
+      tabs={[
+        { label: "About", snippet: aboutTab },
+        { label: "Authors", snippet: authorsTab },
+        { label: "License", snippet: licenseTab },
+      ]}
+    />
   </div>
 </main>
 

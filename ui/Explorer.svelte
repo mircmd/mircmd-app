@@ -1,0 +1,173 @@
+<!--
+  @component Explorer
+
+  Node explorer that displays project structure as a hierarchical tree.
+  Based on the Tree component, it provides navigation and interaction with loaded nodes.
+
+  ## Features
+  - Displays project nodes in a tree structure with icons
+-->
+<script lang="ts" module>
+  import fileIcon from "./assets/icons/tree_file.svg";
+  import { pluginManager } from "./utils/plugins";
+  import { createProgramPluginContext } from "./utils/program_plugin_context";
+  import { getProjectNodeDataById } from "./core/commands";
+
+  const CONTEXT_MENU_COMMON_ITEMS: MenuItem[] = [
+    {
+      label: "Import Files",
+      action: (_: any) => {
+        importFiles(null);
+      },
+    },
+  ];
+
+  function convertToTreeNode(node: ProjectNode): TreeNode {
+    return {
+      id: node.id,
+      label: node.name,
+      type: node.type,
+      icon: pluginManager.icons.get(node.type) || fileIcon,
+      expanded: false,
+      selected: false,
+      children: node.children.map(convertToTreeNode),
+    };
+  }
+</script>
+
+<script lang="ts">
+  import { onMount } from "svelte";
+  import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
+
+  import { getProjectRootNode, importFiles } from "./core/commands";
+  import type { ProjectNode } from "./core/types";
+  import Tree, { type TreeNode } from "./lib/Tree.svelte";
+  import Menu, { type MenuItem } from "./lib/Menu.svelte";
+  import Panel from "./lib/Panel.svelte";
+  import WindowManager from "./lib/WindowManager.svelte";
+
+  interface Props {
+    windowManager: WindowManager;
+  }
+
+  let { windowManager }: Props = $props();
+
+  let treeRef: ReturnType<typeof Tree> = $state()!;
+  let showNodeMenu = $state(false);
+  let showCommonMenu = $state(false);
+  let contextMenuX = $state(0);
+  let contextMenuY = $state(0);
+  let contextMenuNode: TreeNode | null = $state(null);
+  let nodeContextMenuItems: MenuItem[] = $state([]);
+
+  async function loadRootNode() {
+    const rootNode = await getProjectRootNode();
+    treeRef.setRootNode(convertToTreeNode(rootNode));
+  }
+
+  function contextMenuHandler(event: MouseEvent, node: TreeNode | null) {
+    if (node) {
+      showNodeMenu = true;
+      showCommonMenu = false;
+      contextMenuNode = node;
+      nodeContextMenuItems = buildNodeContextMenu(node);
+    } else {
+      showNodeMenu = false;
+      showCommonMenu = true;
+      contextMenuNode = null;
+      nodeContextMenuItems = [];
+    }
+    contextMenuX = event.clientX;
+    contextMenuY = event.clientY;
+  }
+
+  function buildProgramsContextMenu(node: TreeNode): MenuItem[] {
+    const programs = pluginManager.programs.get(node.type);
+    if (!programs) return [];
+    var menuItems: MenuItem[] = [];
+    for (const program of programs) {
+      const metadata = program.metadata();
+      menuItems.push({
+        label: metadata.name,
+        action: (node: TreeNode) => {
+          getProjectNodeDataById(node.id).then((data) => {
+            windowManager.addWindow({
+              icon: node.icon,
+              title: node.label,
+              onmount: (node: HTMLElement) => {
+                const ctx = createProgramPluginContext(node);
+                program.run(ctx, data);
+              },
+              pos: [100, 100],
+            });
+          });
+        },
+      });
+    }
+    return menuItems;
+  }
+
+  function buildNodeContextMenu(node: TreeNode): MenuItem[] {
+    var menuItems: MenuItem[] = [];
+    menuItems.push({
+      label: "Import Files",
+      action: (node: TreeNode) => {
+        importFiles(node.id);
+      },
+    });
+    // menuItems.push({
+    //   label: "Export...",
+    // });
+    const openWithItems = buildProgramsContextMenu(node);
+    if (openWithItems.length > 0) {
+      menuItems.push({ label: "", separator: true });
+      menuItems.push({
+        label: "Open With...",
+        children: openWithItems,
+      });
+    }
+    // menuItems.push({ label: "", separator: true });
+    // menuItems.push({
+    //   label: "Delete",
+    //   children: [],
+    // });
+    // menuItems.push({
+    //   label: "Rename...",
+    //   children: [],
+    // });
+    return menuItems;
+  }
+
+  const appWebview = getCurrentWebviewWindow();
+  appWebview.listen<{ parent_node_id: string | null; node: ProjectNode }>("explorer_add_node", (event) => {
+    treeRef.addNode(convertToTreeNode(event.payload.node), event.payload.parent_node_id);
+  });
+
+  onMount(async () => {
+    await loadRootNode();
+  });
+</script>
+
+<Panel title="Explorer">
+  {#snippet content()}
+    <Tree bind:this={treeRef} oncontextmenu={contextMenuHandler} />
+
+    {#if showNodeMenu}
+      <Menu
+        items={nodeContextMenuItems}
+        posX={contextMenuX}
+        posY={contextMenuY}
+        close={() => (showNodeMenu = false)}
+        data={contextMenuNode}
+      />
+    {:else if showCommonMenu}
+      <Menu
+        items={CONTEXT_MENU_COMMON_ITEMS}
+        posX={contextMenuX}
+        posY={contextMenuY}
+        close={() => (showCommonMenu = false)}
+        data={treeRef.getRootNode()}
+      />
+    {/if}
+  {/snippet}
+</Panel>

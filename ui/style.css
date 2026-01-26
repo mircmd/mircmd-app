@@ -4,7 +4,14 @@
   font-style: normal;
 }
 
-html, body {
+@font-face {
+  font-family: "JetBrainsMono";
+  src: url("./assets/JetBrainsMono.ttf");
+  font-style: normal;
+}
+
+html,
+body {
   height: 100%;
   margin: 0;
   padding: 0;
@@ -38,15 +45,28 @@ body {
   background-color: #ECECEC;
 }
 
+.monospace {
+  font-family: 'JetBrainsMono';
+  font-weight: 450;
+  font-size: 12px;
+}
+
 a {
   color: #2258cc;
 }
 
-button, img, .disable-selection {
+button,
+img,
+.disable-selection {
   user-select: none;
-  -webkit-user-select: none;
   -moz-user-select: none;
-  -ms-user-select: none;
+  -webkit-user-select: none;
+}
+
+.enable-selection {
+  user-select: text;
+  -moz-user-select: text;
+  -webkit-user-select: text;
 }
 
 /* Scrollbar customization */

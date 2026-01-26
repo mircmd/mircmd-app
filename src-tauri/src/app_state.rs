@@ -3,9 +3,8 @@ use crate::consts::Dirs;
 use crate::file_manager::FileManager;
 use crate::plugins::manager::PluginManager;
 use crate::plugins::manifest::PluginType;
-use crate::project::Project;
-use anyhow::Result;
-use std::path::Path;
+use crate::project::{Project, ProjectNode};
+use serde::Serialize;
 use std::sync::Mutex;
 use tauri::Emitter;
 use tauri::Manager;
@@ -13,12 +12,32 @@ use tauri_plugin_dialog::DialogExt;
 use tracing::error;
 use uuid::Uuid;
 
+#[derive(Clone, Serialize)]
+pub enum LogLevel {
+    Debug,
+    Info,
+    Warning,
+    Error,
+}
+
+#[derive(Clone, Serialize)]
+struct ExplorerAddNodeEvent {
+    pub parent_node_id: Option<String>,
+    pub node: ProjectNode,
+}
+
+#[derive(Clone, Serialize)]
+pub struct LogMessage {
+    pub level: LogLevel,
+    pub message: String,
+}
+
 pub struct AppState {
     pub config: Config,
     pub project: Project,
     pub plugin_manager: PluginManager,
     pub file_manager: FileManager,
-    pub startup_messages: Vec<String>,
+    pub startup_messages: Vec<LogMessage>,
 }
 
 impl AppState {
@@ -42,32 +61,10 @@ impl AppState {
             project: Project::new(true),
             plugin_manager,
             file_manager,
-            startup_messages: vec![format!("Mir Commander v{}", env!("CARGO_PKG_VERSION"))],
-        }
-    }
-
-    pub fn import_file(&mut self, file_path: &Path, node_id: Option<String>) -> Result<(), String> {
-        let node = match node_id {
-            Some(id) => {
-                let uuid = Uuid::parse_str(&id).unwrap();
-                self.project
-                    .root_node
-                    .find_by_id_mut(&uuid)
-                    .ok_or_else(|| format!("Node with id {} not found", id))?
-            }
-            None => &mut self.project.root_node,
-        };
-
-        match self.file_manager.import_file(file_path) {
-            Ok(imported_node) => {
-                node.add_child(imported_node);
-                Ok(())
-            }
-            Err(e) => {
-                let error = format!("Failed to import file {}: {}", file_path.display(), e);
-                error!("{}", error);
-                Err(error)
-            }
+            startup_messages: vec![LogMessage {
+                level: LogLevel::Info,
+                message: format!("Mir Commander v{}", env!("CARGO_PKG_VERSION")),
+            }],
         }
     }
 }
@@ -76,14 +73,49 @@ pub fn import_files(app_handle: tauri::AppHandle, node_id: Option<String>) {
     app_handle.dialog().file().pick_files(move |file_paths| {
         if let Some(files) = file_paths {
             let state_handle = app_handle.state::<Mutex<AppState>>();
-            let mut state = state_handle.lock().unwrap();
+            let mut guard = state_handle.lock().unwrap();
+            let state = &mut *guard;
+
+            let project = &mut state.project;
+            let file_manager = &mut state.file_manager;
+
+            let node = match node_id {
+                Some(ref id) => {
+                    let uuid = Uuid::parse_str(id).unwrap();
+                    match project.root_node.find_by_id_mut(&uuid) {
+                        Some(node) => node,
+                        None => {
+                            error!("Node with id {} not found", id);
+                            return;
+                        }
+                    }
+                }
+                None => &mut project.root_node,
+            };
+
             for file in files {
-                match state.import_file(file.as_path().unwrap(), node_id.clone()) {
-                    Ok(_) => {
-                        let _ = app_handle.emit("explorer_refresh", true);
+                let file_path = file.as_path().unwrap();
+                match file_manager.import_file(file_path) {
+                    Ok(imported_node) => {
+                        node.add_child(imported_node.clone());
+                        let _ = app_handle.emit(
+                            "explorer_add_node",
+                            ExplorerAddNodeEvent {
+                                parent_node_id: node_id.clone(),
+                                node: imported_node,
+                            },
+                        );
                     }
                     Err(e) => {
-                        let _ = app_handle.emit("console_output_append_line", e);
+                        let error_msg = format!("Failed to import file {}: {}", file_path.display(), e);
+                        error!("{}", error_msg);
+                        let _ = app_handle.emit(
+                            "console_output_append_line",
+                            LogMessage {
+                                level: LogLevel::Error,
+                                message: error_msg,
+                            },
+                        );
                     }
                 }
             }

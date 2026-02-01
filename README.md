@@ -1,8 +1,7 @@
 # Mir Commander
 
-The primary goal of this project is the creation of a graphical user interface (GUI) for scientific modeling
-using the [Mir](https://mir.vishnevskiy.group) language and [UNEX](https://unex.vishnevskiy.group) program.
-UNEX is well-established software for molecular structure refinement.
-Accordingly, Mir Commander is able to visualize molecular structures as well as other types of numerical data.
+**Mir Commander** is an integrated environment for scientific and engineering software. Its main purpose is to provide a common basis for different plugins, which in turn implement functionality for data processing, simulations, etc. In particular, here is developed the cental graphical user interface (GUI), methods for manipulating with data objects, intercommunication between plugins and their synchronization.
 
-Currently, we are focused on the very basic functionality that allows visualizing molecules from files in the standard XYZ format.
+On the basis of Mir Commander have been created [chemistry plugins](https://github.com/v-v-vishnevskiy/mircmd-chemistry-plugins) for supporting molecular modeling, including structure visualization and manipulation, plotting of orbitals, high-resolution image saving.
+
+Currently, in Mir Commander we are focused on the development of basic functionality and stable API that allows reliable operation of plugins.

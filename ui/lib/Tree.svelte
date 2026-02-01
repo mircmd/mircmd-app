@@ -232,7 +232,6 @@
     align-items: center;
     height: 22px;
     padding-right: 8px;
-    cursor: pointer;
     white-space: nowrap;
     border-radius: 3px;
     margin: 1px 4px;

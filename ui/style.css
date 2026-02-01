@@ -51,6 +51,10 @@ body {
   font-size: 12px;
 }
 
+.hidden {
+  display: none;
+}
+
 a {
   color: #2258cc;
 }

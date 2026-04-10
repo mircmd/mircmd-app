@@ -90,13 +90,14 @@
       menuItems.push({
         label: metadata.name,
         action: (node: TreeNode) => {
+          const node_type = node.type;
           getProjectNodeDataById(node.id).then((data) => {
             windowManager.addWindow({
               icon: node.icon,
               title: node.label,
               onmount: (node: HTMLElement) => {
                 const ctx = createProgramPluginContext(node);
-                program.run(ctx, data);
+                program.run(ctx, node_type, data);
               },
               pos: [100, 100],
             });

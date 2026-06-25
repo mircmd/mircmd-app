@@ -3,7 +3,7 @@ import type { PluginMetadata } from "../core/types";
 import type { ProgramPluginContext } from "./program_plugin_context";
 
 export interface ProgramPlugin {
-  run: (ctx: ProgramPluginContext, data: Uint8Array) => string;
+  run: (ctx: ProgramPluginContext, node_type: string, node_data: Uint8Array) => string;
   supportedTypes: () => string[];
   metadata: () => PluginMetadata;
 }

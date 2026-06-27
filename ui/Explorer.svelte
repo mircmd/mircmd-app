@@ -64,9 +64,8 @@
 
   function contextMenuHandler(event: MouseEvent, node: TreeNode | null) {
     contextMenu.open({
+      event,
       items: node ? buildNodeContextMenu(node) : CONTEXT_MENU_COMMON_ITEMS,
-      posX: event.clientX,
-      posY: event.clientY,
       data: node ?? treeRef.getRootNode(),
     });
   }

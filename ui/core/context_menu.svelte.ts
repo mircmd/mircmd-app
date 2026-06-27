@@ -31,9 +31,14 @@ export function getContextMenu() {
     get current() {
       return state;
     },
-    open(params: { items: MenuItem[]; posX: number; posY: number; data?: unknown }) {
+    open(params: { event: MouseEvent; items: MenuItem[]; data?: unknown }) {
       open_id += 1;
-      state = { id: open_id, ...params, data: params.data ?? null };
+      state = { id: open_id, 
+        posX: params.event.clientX, 
+        posY: params.event.clientY, 
+        ...params, 
+        data: params.data ?? null 
+      };
     },
     close() {
       state = null;

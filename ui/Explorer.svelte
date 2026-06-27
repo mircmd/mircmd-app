@@ -42,23 +42,20 @@
   import { getProjectRootNode, importFiles } from "./core/commands";
   import type { ProjectNode } from "./core/types";
   import Tree, { type TreeNode } from "./lib/Tree.svelte";
-  import Menu, { type MenuItem } from "./lib/Menu.svelte";
+  import type { MenuItem } from "./lib/Menu.svelte";
   import Panel from "./lib/Panel.svelte";
   import WindowManager from "./lib/WindowManager.svelte";
+  import { getContextMenu } from "./core/context_menu.svelte";
 
   interface Props {
     windowManager: WindowManager;
   }
 
+  const contextMenu = getContextMenu();
+
   let { windowManager }: Props = $props();
 
   let treeRef: ReturnType<typeof Tree> = $state()!;
-  let showNodeMenu = $state(false);
-  let showCommonMenu = $state(false);
-  let contextMenuX = $state(0);
-  let contextMenuY = $state(0);
-  let contextMenuNode: TreeNode | null = $state(null);
-  let nodeContextMenuItems: MenuItem[] = $state([]);
 
   async function loadRootNode() {
     const rootNode = await getProjectRootNode();
@@ -66,19 +63,12 @@
   }
 
   function contextMenuHandler(event: MouseEvent, node: TreeNode | null) {
-    if (node) {
-      showNodeMenu = true;
-      showCommonMenu = false;
-      contextMenuNode = node;
-      nodeContextMenuItems = buildNodeContextMenu(node);
-    } else {
-      showNodeMenu = false;
-      showCommonMenu = true;
-      contextMenuNode = null;
-      nodeContextMenuItems = [];
-    }
-    contextMenuX = event.clientX;
-    contextMenuY = event.clientY;
+    contextMenu.open({
+      items: node ? buildNodeContextMenu(node) : CONTEXT_MENU_COMMON_ITEMS,
+      posX: event.clientX,
+      posY: event.clientY,
+      data: node ?? treeRef.getRootNode(),
+    });
   }
 
   function buildProgramsContextMenu(node: TreeNode): MenuItem[] {
@@ -152,23 +142,5 @@
 <Panel title="Explorer">
   {#snippet content()}
     <Tree bind:this={treeRef} oncontextmenu={contextMenuHandler} />
-
-    {#if showNodeMenu}
-      <Menu
-        items={nodeContextMenuItems}
-        posX={contextMenuX}
-        posY={contextMenuY}
-        close={() => (showNodeMenu = false)}
-        data={contextMenuNode}
-      />
-    {:else if showCommonMenu}
-      <Menu
-        items={CONTEXT_MENU_COMMON_ITEMS}
-        posX={contextMenuX}
-        posY={contextMenuY}
-        close={() => (showCommonMenu = false)}
-        data={treeRef.getRootNode()}
-      />
-    {/if}
   {/snippet}
 </Panel>

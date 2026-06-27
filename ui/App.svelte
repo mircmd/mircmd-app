@@ -6,7 +6,7 @@
   import Workspace from "./lib/Workspace.svelte";
   import Explorer from "./Explorer.svelte";
   import WindowManager from "./lib/WindowManager.svelte";
-  import { pluginManager } from "./utils/plugins";
+  import { pluginManager } from "./core/plugins";
 
   let workspaceRef: ReturnType<typeof Workspace>;
   let windowManagerRef: ReturnType<typeof WindowManager>;

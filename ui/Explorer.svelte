@@ -9,8 +9,8 @@
 -->
 <script lang="ts" module>
   import fileIcon from "./assets/icons/tree_file.svg";
-  import { pluginManager } from "./utils/plugins";
-  import { createProgramPluginContext } from "./utils/program_plugin_context";
+  import { pluginManager } from "./core/plugins";
+  import { createProgramPluginContext } from "./core/program_plugin_context";
   import { getProjectNodeDataById } from "./core/commands";
 
   const CONTEXT_MENU_COMMON_ITEMS: MenuItem[] = [

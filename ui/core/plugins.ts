@@ -1,5 +1,5 @@
-import { getPlugins, log } from "../core/commands";
-import type { PluginMetadata } from "../core/types";
+import { getPlugins, log } from "./commands";
+import type { PluginMetadata } from "./types";
 import type { ProgramPluginContext } from "./program_plugin_context";
 
 export interface ProgramPlugin {

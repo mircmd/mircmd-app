@@ -88,7 +88,7 @@
                 const ctx = createProgramPluginContext(node);
                 program.run(ctx, node_type, data);
               },
-              pos: [100, 100],
+              pos: [0, 0],
             });
           });
         },

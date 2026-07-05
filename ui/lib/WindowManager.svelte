@@ -35,7 +35,7 @@
   const DEFAULTS = {
     state: "normal",
     pos: [0, 0],
-    size: [400, 300],
+    size: [500, 500],
     minSize: [50, 50],
   };
 
@@ -49,6 +49,9 @@
   import closeWindowIcon from "../assets/icons/window_close.svg";
   import expandWindowIcon from "../assets/icons/window_expand.svg";
   import collapseWindowIcon from "../assets/icons/window_collapse.svg";
+  import { getContextMenu } from "../core/context_menu.svelte";
+
+  const contextMenu = getContextMenu();
 
   // Internal state
   let windows = $state<Window[]>([]);
@@ -203,6 +206,8 @@
   // Context API methods
   export function addWindow(params: WindowInput) {
     const windowId = generateId();
+    let pos = params.pos ?? [0, 0];
+    params.pos = [pos[0] - RESIZE_HANDLE_SIZE, pos[1] - RESIZE_HANDLE_SIZE];
     const newWindow: Window = {
       id: windowId,
       ...DEFAULTS,

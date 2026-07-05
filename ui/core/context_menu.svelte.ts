@@ -33,11 +33,11 @@ export function getContextMenu() {
     },
     open(params: { event: MouseEvent; items: MenuItem[]; data?: unknown }) {
       open_id += 1;
-      state = { id: open_id, 
-        posX: params.event.clientX, 
-        posY: params.event.clientY, 
-        ...params, 
-        data: params.data ?? null 
+      state = { id: open_id,
+        posX: params.event.clientX,
+        posY: params.event.clientY,
+        ...params,
+        data: params.data ?? null
       };
     },
     close() {

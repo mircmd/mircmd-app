@@ -21,6 +21,10 @@
   - `id: string` - Unique identifier
   - `label: string` - Display text
   - `icon?: string` - Icon URL
+  - `disabled?: boolean` - Whether the item is disabled and unclickable
+  - `shortcut?: string` - Keyboard shortcut text to display
+  - `checkable?: boolean` - Whether the item behaves as a checkbox
+  - `checked?: boolean` - Whether the checkbox is checked
   - `action?: () => void` - Click handler
   - `children?: MenuItem[]` - Nested menu items
   - `separator?: boolean` - Render as separator line
@@ -29,15 +33,20 @@
   export interface MenuItem {
     label: string;
     icon?: string;
+    disabled?: boolean;
+    shortcut?: string;
     action?: (data: any) => void;
     children?: MenuItem[];
+    checkable?: boolean;
+    checked?: boolean;
     separator?: boolean;
   }
 </script>
 
 <script lang="ts">
-  import { onMount, onDestroy } from "svelte";
   import arrowIcon from "../assets/icons/menu_arrow.svg";
+  import { formatShortcut } from "../core/utils";
+  import { onDestroy, onMount } from "svelte";
 
   interface Props {
     items: MenuItem[];
@@ -57,18 +66,24 @@
   }
 
   function itemClickHandler(item: MenuItem) {
+    if (item.disabled) return;
     if (hasChildren(item)) return;
     item.action?.(data);
     close();
   }
 
-  function itemMouseEnterHandler(event: MouseEvent, index: number, level: number) {
+  function itemMouseEnterHandler(event: MouseEvent, index: number, level: number, item: MenuItem) {
+    if (item.disabled) {
+      selectedItems.splice(level, selectedItems.length);
+      return;
+    }
     const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
     selectedItems.splice(level, selectedItems.length);
     selectedItems.push({ index, x: rect.x, y: rect.y - 7, w: rect.width });
   }
 
   function itemKeyDownHandler(event: KeyboardEvent, item: MenuItem) {
+    if (item.disabled) return;
     if (event.key === "Enter") {
       itemClickHandler(item);
     }
@@ -127,32 +142,46 @@
 </script>
 
 {#snippet menu(menuItems: MenuItem[], level: number)}
+  {@const anyCheckable = menuItems.some((item) => item.checkable)}
   <div
     class="context-menu"
     style="left: {menuCoords[level]?.x}px; top: {menuCoords[level]?.y}px; z-index: {10000 + level};"
     use:adjustPosition={level}
     role="menu"
   >
-    {#each menuItems as item, index}
+    {#each menuItems as item, index (index)}
       {#if item.separator}
         <div class="menu-separator" role="separator"></div>
       {:else}
         <div
           class="menu-item"
-          class:menu-item-hover={(selectedItems[level]?.index ?? -1) === index}
+          class:disabled={item.disabled}
+          class:menu-item-hover={(selectedItems[level]?.index ?? -1) === index && !item.disabled}
           onclick={() => itemClickHandler(item)}
-          onmouseenter={(e) => itemMouseEnterHandler(e, index, level)}
+          onmouseenter={(e) => itemMouseEnterHandler(e, index, level, item)}
           onkeydown={(e) => itemKeyDownHandler(e, item)}
           role="menuitem"
-          tabindex="0"
+          tabindex={item.disabled ? -1 : 0}
         >
+          {#if anyCheckable}
+            <div class="menu-item-checkbox-container">
+              {#if item.checkable && item.checked}
+                <svg class="checkmark-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 4L6 10L3 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              {/if}
+            </div>
+          {/if}
           <span class="menu-item-label">{item.label}</span>
+          {#if item.shortcut}
+            <span class="menu-item-shortcut">{formatShortcut(item.shortcut)}</span>
+          {/if}
           {#if hasChildren(item)}
             <img src={arrowIcon} alt="" class="submenu-arrow" />
           {/if}
         </div>
 
-        {#if (selectedItems[level]?.index ?? -1) === index && hasChildren(item)}
+        {#if (selectedItems[level]?.index ?? -1) === index && hasChildren(item) && !item.disabled}
           {@render menu(item.children ?? [], level + 1)}
         {/if}
       {/if}
@@ -185,30 +214,66 @@
     height: 22px;
   }
 
-  .menu-item:hover,
-  .menu-item-hover {
+  .menu-item:not(.disabled):hover,
+  .menu-item-hover:not(.disabled) {
     background-color: #317ae7;
   }
 
-  .menu-item:hover .submenu-arrow,
-  .menu-item-hover .submenu-arrow {
+  .menu-item:not(.disabled):hover .submenu-arrow,
+  .menu-item-hover:not(.disabled) .submenu-arrow {
     filter: brightness(0) invert(1);
   }
 
-  .menu-item:hover .menu-item-label,
-  .menu-item:focus .menu-item-label,
-  .menu-item-hover .menu-item-label {
+  .menu-item:not(.disabled):hover .menu-item-label,
+  .menu-item:not(.disabled):focus .menu-item-label,
+  .menu-item-hover:not(.disabled) .menu-item-label {
     color: #ffffff;
   }
 
-  .menu-item:focus {
+  .menu-item:not(.disabled):hover .menu-item-shortcut,
+  .menu-item:not(.disabled):focus .menu-item-shortcut,
+  .menu-item-hover:not(.disabled) .menu-item-shortcut {
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  .menu-item:not(.disabled):focus {
     outline: none;
     background-color: #3b9dff;
     color: #ffffff;
   }
 
+  .menu-item.disabled,
+  .menu-item.disabled .menu-item-label {
+    color: #8c8c8c;
+    cursor: default;
+  }
+
+  .menu-item.disabled .submenu-arrow {
+    opacity: 0.5;
+  }
+
   .menu-item-label {
     flex: 1;
+  }
+
+  .menu-item-shortcut {
+    color: #8c8c8c;
+    margin-left: 16px;
+  }
+
+  .menu-item-checkbox-container {
+    width: 16px;
+    height: 16px;
+    margin-right: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .checkmark-icon {
+    width: 14px;
+    height: 14px;
   }
 
   .submenu-arrow {

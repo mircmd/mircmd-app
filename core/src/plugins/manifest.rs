@@ -22,9 +22,15 @@ pub enum PluginTarget {
     Ui,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub enum PluginProtocol {
+    v1,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PluginManifest {
     pub target: PluginTarget,
     pub r#type: PluginType,
+    pub protocol: PluginProtocol,
     pub metadata: Metadata,
 }

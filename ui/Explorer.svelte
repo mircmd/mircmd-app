@@ -10,8 +10,6 @@
 <script lang="ts" module>
   import fileIcon from "./assets/icons/tree_file.svg";
   import { pluginManager } from "./core/plugins";
-  import { createProgramPluginContext } from "./core/program_plugin_context";
-  import { getProjectNodeDataById } from "./core/commands";
 
   const CONTEXT_MENU_COMMON_ITEMS: MenuItem[] = [
     {
@@ -39,21 +37,21 @@
   import { onMount } from "svelte";
   import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
 
-  import { getProjectRootNode, importFiles } from "./core/commands";
+  import { getProjectRootNode, importFiles, log } from "./core/commands";
   import type { ProjectNode } from "./core/types";
   import Tree, { type TreeNode } from "./lib/Tree.svelte";
   import type { MenuItem } from "./lib/Menu.svelte";
   import Panel from "./lib/Panel.svelte";
-  import WindowManager from "./lib/WindowManager.svelte";
   import { getContextMenu } from "./core/context_menu.svelte";
+  import type { ProgramManager } from "./core/program_manager.svelte";
 
   interface Props {
-    windowManager: WindowManager;
+    programManager: ProgramManager;
   }
 
   const contextMenu = getContextMenu();
 
-  let { windowManager }: Props = $props();
+  let { programManager }: Props = $props();
 
   let treeRef: ReturnType<typeof Tree> = $state()!;
 
@@ -73,24 +71,23 @@
   function buildProgramsContextMenu(node: TreeNode): MenuItem[] {
     const programs = pluginManager.programs.get(node.type);
     if (!programs) return [];
-    var menuItems: MenuItem[] = [];
-    for (const program of programs) {
-      const metadata = program.metadata();
+
+    const menuItems: MenuItem[] = [];
+    for (const descriptor of programs) {
       menuItems.push({
-        label: metadata.name,
-        action: (node: TreeNode) => {
-          const node_type = node.type;
-          getProjectNodeDataById(node.id).then((data) => {
-            windowManager.addWindow({
-              icon: node.icon,
-              title: node.label,
-              onmount: (node: HTMLElement) => {
-                const ctx = createProgramPluginContext(node);
-                program.run(ctx, node_type, data);
-              },
-              pos: [0, 0],
+        label: descriptor.metadata.name,
+        action: (target: TreeNode) => {
+          void programManager
+            .openProgram({
+              nodeId: target.id,
+              nodeName: target.label,
+              nodeType: target.type,
+              icon: target.icon,
+              descriptor,
+            })
+            .catch((error) => {
+              log.error(`Failed to open program ${descriptor.key}: ${error}`);
             });
-          });
         },
       });
     }
@@ -98,16 +95,14 @@
   }
 
   function buildNodeContextMenu(node: TreeNode): MenuItem[] {
-    var menuItems: MenuItem[] = [];
+    const menuItems: MenuItem[] = [];
     menuItems.push({
       label: "Import Files",
-      action: (node: TreeNode) => {
-        importFiles(node.id);
+      action: (target: TreeNode) => {
+        importFiles(target.id);
       },
     });
-    // menuItems.push({
-    //   label: "Export...",
-    // });
+
     const openWithItems = buildProgramsContextMenu(node);
     if (openWithItems.length > 0) {
       menuItems.push({ label: "", separator: true });
@@ -116,15 +111,6 @@
         children: openWithItems,
       });
     }
-    // menuItems.push({ label: "", separator: true });
-    // menuItems.push({
-    //   label: "Delete",
-    //   children: [],
-    // });
-    // menuItems.push({
-    //   label: "Rename...",
-    //   children: [],
-    // });
     return menuItems;
   }
 

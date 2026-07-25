@@ -32,6 +32,24 @@
 
   export type WindowInput = Partial<Omit<Window, "id">>;
 
+  /** Stable handle returned by addWindow. Domain session lives in ProgramManager. */
+  export type WindowHandle = {
+    id: string;
+    focus(): void;
+    close(): void;
+  };
+
+  export type WindowMountContext = {
+    windowId: string;
+    host: HTMLElement;
+    signal: AbortSignal;
+  };
+
+  export type ActiveWindowChange = {
+    windowId: string | null;
+    previousWindowId: string | null;
+  };
+
   const DEFAULTS = {
     state: "normal",
     pos: [0, 0],
@@ -49,9 +67,6 @@
   import closeWindowIcon from "../assets/icons/window_close.svg";
   import expandWindowIcon from "../assets/icons/window_expand.svg";
   import collapseWindowIcon from "../assets/icons/window_collapse.svg";
-  import { getContextMenu } from "../core/context_menu.svelte";
-
-  const contextMenu = getContextMenu();
 
   // Internal state
   let windows = $state<Window[]>([]);
@@ -63,9 +78,26 @@
   let lastMouseState = { clientX: 0, clientY: 0, layerX: 0, layerY: 0 };
   let lastWindowState = { w: 0, h: 0, x: 0, y: 0 };
   let windowResizeEdges: ResizeEdge[] = [];
+  let closingWindowIds = new Set<string>();
+
+  type ActiveChangeListener = (change: ActiveWindowChange) => void;
+  type CloseRequestListener = (windowId: string) => void | Promise<void>;
+  type RemovedListener = (windowId: string) => void;
+
+  const activeChangeListeners = new Set<ActiveChangeListener>();
+  const closeRequestListeners = new Set<CloseRequestListener>();
+  const removedListeners = new Set<RemovedListener>();
 
   let isInteracting = $derived(windowUnderAction !== null);
   let activeWindow = $derived(windowsZIndex[windowsZIndex.length - 1]);
+
+  function notifyActiveChange(previousWindowId: string | null, windowId: string | null): void {
+    if (previousWindowId === windowId) return;
+    const change: ActiveWindowChange = { windowId, previousWindowId };
+    for (const listener of activeChangeListeners) {
+      listener(change);
+    }
+  }
 
   $effect(() => {
     if (isInteracting) {
@@ -204,7 +236,8 @@
   }
 
   // Context API methods
-  export function addWindow(params: WindowInput) {
+  export function addWindow(params: WindowInput): WindowHandle {
+    const previousActive = activeWindow ?? null;
     const windowId = generateId();
     let pos = params.pos ?? [0, 0];
     params.pos = [pos[0] - RESIZE_HANDLE_SIZE, pos[1] - RESIZE_HANDLE_SIZE];
@@ -216,24 +249,87 @@
 
     windows.push(newWindow);
     windowsZIndex.push(windowId);
+    notifyActiveChange(previousActive, windowId);
+
+    return {
+      id: windowId,
+      focus: () => setFocus(newWindow),
+      close: () => {
+        void closeWindow(newWindow);
+      },
+    };
   }
 
   function getWindow(windowId: string): Window | null {
     return windows.find((w) => w.id === windowId) ?? null;
   }
 
+  /** Stable activation history for Apply-to-all routing (most recent first). */
+  export function getActivationHistory(): string[] {
+    return [...windowsZIndex].reverse();
+  }
+
+  export function getActiveWindowId(): string | null {
+    return activeWindow ?? null;
+  }
+
+  export function onActiveWindowChange(listener: ActiveChangeListener): () => void {
+    activeChangeListeners.add(listener);
+    return () => {
+      activeChangeListeners.delete(listener);
+    };
+  }
+
+  export function onWindowCloseRequest(listener: CloseRequestListener): () => void {
+    closeRequestListeners.add(listener);
+    return () => {
+      closeRequestListeners.delete(listener);
+    };
+  }
+
+  export function onWindowRemoved(listener: RemovedListener): () => void {
+    removedListeners.add(listener);
+    return () => {
+      removedListeners.delete(listener);
+    };
+  }
+
   // Window operations
   function setFocus(window: Window) {
+    const previousActive = activeWindow ?? null;
     const index = windowsZIndex.indexOf(window.id!);
     if (index !== -1 && index !== windowsZIndex.length - 1) {
       windowsZIndex.splice(index, 1);
       windowsZIndex.push(window.id!);
     }
+    notifyActiveChange(previousActive, window.id ?? null);
   }
 
-  function closeWindow(window: Window): void {
-    windows = windows.filter((w) => w.id !== window.id);
-    windowsZIndex = windowsZIndex.filter((w) => w !== window.id);
+  async function closeWindow(window: Window): Promise<void> {
+    const windowId = window.id;
+    if (!windowId || closingWindowIds.has(windowId)) return;
+    closingWindowIds.add(windowId);
+
+    const previousActive = activeWindow ?? null;
+
+    for (const listener of [...closeRequestListeners]) {
+      try {
+        await listener(windowId);
+      } catch (error) {
+        console.error(`Window close request listener failed for ${windowId}:`, error);
+      }
+    }
+
+    windows = windows.filter((w) => w.id !== windowId);
+    windowsZIndex = windowsZIndex.filter((w) => w !== windowId);
+    closingWindowIds.delete(windowId);
+
+    for (const listener of [...removedListeners]) {
+      listener(windowId);
+    }
+
+    const nextActive = windowsZIndex[windowsZIndex.length - 1] ?? null;
+    notifyActiveChange(previousActive, nextActive);
   }
 
   function startDragging(event: MouseEvent, window: Window): void {
@@ -319,6 +415,9 @@
 
   onDestroy(() => {
     detachGlobalListeners();
+    for (const window of [...windows]) {
+      void closeWindow(window);
+    }
   });
 </script>
 
@@ -388,7 +487,7 @@
             class="window-btn close"
             onclick={(e) => {
               e.stopPropagation();
-              closeWindow(window);
+              void closeWindow(window);
             }}
             aria-label="Close window"
           >

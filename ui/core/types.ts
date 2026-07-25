@@ -1,16 +1,6 @@
-export interface Window {
-  pos: [number, number];
-  size: [number, number];
-}
-
-export interface AppConfig {
-  language: 'system' | 'english' | 'russian';
-  window: Window;
-}
-
 export interface LogMessage {
   message: string;
-  level: "debug" | "info" | "warning" | "error";
+  level: 'debug' | 'info' | 'warning' | 'error';
 }
 
 export interface ProjectNode {
@@ -21,14 +11,18 @@ export interface ProjectNode {
 }
 
 export enum PluginTarget {
-  Core = 'Core',
-  Ui = 'Ui',
+  Core = 'core',
+  Ui = 'ui',
 }
 
 export enum PluginType {
-  Icons = 'Icons',
-  FileImporter = 'FileImporter',
-  Program = 'Program',
+  Icons = 'icons',
+  FileImporter = 'file_importer',
+  Program = 'program',
+}
+
+export enum PluginProtocol {
+  V1 = 'v1',
 }
 
 export interface PluginMetadata {
@@ -42,6 +36,7 @@ export interface PluginMetadata {
 export interface PluginManifest {
   target: PluginTarget;
   type: PluginType;
+  protocol: PluginProtocol;
   metadata: PluginMetadata;
 }
 

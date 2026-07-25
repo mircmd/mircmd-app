@@ -10,6 +10,7 @@ pub struct Metadata {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub enum PluginType {
     FileImporter,
     Icons,
@@ -17,14 +18,16 @@ pub enum PluginType {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub enum PluginTarget {
     Core,
     Ui,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub enum PluginProtocol {
-    v1,
+    V1,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

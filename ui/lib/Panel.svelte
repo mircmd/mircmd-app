@@ -1,11 +1,7 @@
 <!--
   @component Panel
 
-  Panel widget component for dockable panel content within Workspace.
-  Represents a single dockable panel with title bar.
-
-  ## Features
-  - title bar with text label
+  Panel widget with a title bar and content area.
 
   ## Layout Structure
   ```
@@ -17,9 +13,6 @@
   │                                 │
   └─────────────────────────────────┘
   ```
-
-  ## Props
-  - `title: string` - Title bar text (default: "")
 -->
 <script lang="ts">
   import type { Component, Snippet } from "svelte";
@@ -27,13 +20,21 @@
   interface Props {
     title: string;
     showTitle?: boolean;
+    /** Additional panel-specific title actions. */
+    titleActions?: Snippet;
     content?: Snippet;
     component?: Component<any>;
     props?: Record<string, any>;
   }
 
-  let { title, showTitle: initialShowTitle = true, content, component, props }: Props = $props();
-  let showTitle = $state(initialShowTitle);
+  let {
+    title,
+    showTitle = $bindable(true),
+    titleActions,
+    content,
+    component,
+    props,
+  }: Props = $props();
 
   export function setShowTitle(value: boolean) {
     showTitle = value;
@@ -44,6 +45,11 @@
   {#if showTitle}
     <div class="panel-title background" role="button" tabindex="0">
       <span class="title-text">{title}</span>
+      {#if titleActions}
+        <span class="title-actions">
+          {@render titleActions()}
+        </span>
+      {/if}
     </div>
   {/if}
 
@@ -86,6 +92,14 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     min-width: 0;
+    flex: 1;
+  }
+
+  .title-actions {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    margin-left: 8px;
   }
 
   .panel-content {

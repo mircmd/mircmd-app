@@ -2,13 +2,43 @@ import { invoke } from '@tauri-apps/api/core';
 
 export const isDesktop = '__TAURI_INTERNALS__' in window;
 
-import type { AppConfig, LogMessage, ProjectNode, PluginInfo } from './types';
+import { type AppState, Language, DockPosition } from './app_state';
+import type { LogMessage, ProjectNode, PluginInfo } from './types';
 
-const defaultConfig: AppConfig = {
-  language: 'system',
+
+const defaultAppState: AppState = {
+  language: Language.System,
   window: {
     pos: [0, 0],
     size: [1024, 768],
+  },
+  workspace: {
+    docks: {
+      left: {
+        visible: true,
+        size: 200,
+      },
+      right: {
+        visible: true,
+        size: 350,
+      },
+      bottom: {
+        visible: true,
+        size: 150,
+      },
+    },
+    panels: [
+      {
+        id: 'builtin:explorer',
+        dock_position: DockPosition.Left,
+        visible: true,
+      },
+      {
+        id: 'builtin:console-output',
+        dock_position: DockPosition.Bottom,
+        visible: true,
+      }
+    ],
   },
 };
 
@@ -32,13 +62,13 @@ export const log = {
     isDesktop ? invoke('log', { level: 'trace', message }) : console.trace(message),
 };
 
-export async function getAppConfig(): Promise<AppConfig> {
-  if (!isDesktop) return defaultConfig;
+export async function getAppState(): Promise<AppState> {
+  if (!isDesktop) return defaultAppState;
   try {
-    return await invoke<AppConfig>('get_app_config');
+    return await invoke<AppState>('get_app_state');
   } catch (e) {
     log.error(`Failed to get app config: ${e}`);
-    return defaultConfig;
+    return defaultAppState;
   }
 }
 
@@ -101,4 +131,4 @@ export async function getPlugins(): Promise<PluginInfo[]> {
     log.error(`Failed to get plugins: ${e}`);
     return [];
   }
-};
+}

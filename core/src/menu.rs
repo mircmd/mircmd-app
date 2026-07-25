@@ -10,6 +10,16 @@ pub fn create_menu(app: &mut App) -> Result<()> {
     let item_update = MenuItem::with_id(handle, "check_updates", "Check for Updates...", true, None::<&str>)?;
     let item_import = MenuItem::with_id(handle, "import_files", "Import Files...", true, Some("CmdOrCtrl+I"))?;
     let item_settings = MenuItem::with_id(handle, "settings", "Settings...", true, None::<&str>)?;
+    // TODO: initialize checked state from config; sync with webview when panel is hidden via title button
+    let item_explorer = CheckMenuItem::with_id(handle, "toggle_explorer", "Explorer", true, true, None::<&str>)?;
+    let item_console_output = CheckMenuItem::with_id(
+        handle,
+        "toggle_console_output",
+        "Console Output",
+        true,
+        true,
+        None::<&str>,
+    )?;
 
     #[cfg(target_os = "macos")]
     {
@@ -25,9 +35,14 @@ pub fn create_menu(app: &mut App) -> Result<()> {
             .build()?;
 
         let file_submenu = SubmenuBuilder::new(handle, "File").item(&item_import).build()?;
+        let view_submenu = SubmenuBuilder::new(handle, "View")
+            .item(&item_explorer)
+            .item(&item_console_output)
+            .build()?;
 
         menu.append(&app_submenu)?;
         menu.append(&file_submenu)?;
+        menu.append(&view_submenu)?;
     }
 
     #[cfg(not(target_os = "macos"))]
@@ -40,12 +55,18 @@ pub fn create_menu(app: &mut App) -> Result<()> {
             .quit_with_text("Quit Mir Commander")
             .build()?;
 
+        let view_submenu = SubmenuBuilder::new(handle, "View")
+            .item(&item_explorer)
+            .item(&item_console_output)
+            .build()?;
+
         let help_submenu = SubmenuBuilder::new(handle, "Help")
             .item(&item_about)
             .item(&item_update)
             .build()?;
 
         menu.append(&file_submenu)?;
+        menu.append(&view_submenu)?;
         menu.append(&help_submenu)?;
     }
 
@@ -78,6 +99,14 @@ pub fn create_menu(app: &mut App) -> Result<()> {
         }
         "check_updates" => {
             println!("Click: Check Updates");
+        }
+        "toggle_explorer" => {
+            // TODO: emit event to main webview; sync checked state with WorkspacePreferences
+            println!("Click: Toggle Explorer");
+        }
+        "toggle_console_output" => {
+            // TODO: emit event to main webview; sync checked state with WorkspacePreferences
+            println!("Click: Toggle Console");
         }
         _ => {
             println!("Other event: {:?}", event.id());

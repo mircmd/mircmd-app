@@ -1,33 +1,48 @@
 import { getContextMenu } from "./context_menu.svelte";
-import type { MenuItem } from "../lib/Menu.svelte";
+import type { ContextMenuParams } from "./context_menu_types";
+import type { ProgramNodeIdentity, ProgramPluginContext } from "./program_plugin_api";
+import { adoptPluginSurface, type PluginSurfaceHandle } from "./plugin_surface";
 
-export interface ProgramPluginContext {
-  host: HTMLElement;
-  root: ShadowRoot;
-  addStyles: (cssText: string) => void;
-  contextMenu: {
-    open: (params: { event: MouseEvent; items: MenuItem[]; data?: unknown }) => void;
-    close: () => void;
-  };
-}
+export type { ProgramPluginContext };
 
 const contextMenu = getContextMenu();
 
-export function createProgramPluginContext(host: HTMLElement): ProgramPluginContext {
-  const shadowRoot = host.attachShadow({ mode: 'open' });
-  shadowRoot.innerHTML = "";
+export type CreateProgramPluginContextOptions = {
+  signal?: AbortSignal;
+  node?: ProgramNodeIdentity;
+};
+
+export type ProgramPluginContextHandle = ProgramPluginContext & {
+  /** Dispose the underlying plugin surface (clears Shadow DOM). */
+  disposeSurface(): void;
+};
+
+/**
+ * Builds a program context on top of a PluginSurface adopted from the window host.
+ */
+export function createProgramPluginContext(
+  host: HTMLElement,
+  options: CreateProgramPluginContextOptions = {},
+): ProgramPluginContextHandle {
+  const surface: PluginSurfaceHandle = adoptPluginSurface(host);
+
+  const signal = options.signal ?? new AbortController().signal;
+  const node: ProgramNodeIdentity = options.node ?? {
+    id: "",
+    name: "",
+    type: "",
+  };
 
   return {
-    host,
-    root: shadowRoot,
-    addStyles: (cssText) => {
-      const style = document.createElement('style');
-      style.textContent = cssText;
-      shadowRoot.appendChild(style);
-    },
+    host: surface.host,
+    root: surface.root,
+    signal,
+    node,
+    addStyles: (cssText) => surface.addStyles(cssText),
     contextMenu: {
-      open: (params) => contextMenu.open(params),
-      close: () => contextMenu.close()
-    }
+      open: (params: ContextMenuParams) => contextMenu.open(params),
+      close: () => contextMenu.close(),
+    },
+    disposeSurface: () => surface.dispose(),
   };
 }

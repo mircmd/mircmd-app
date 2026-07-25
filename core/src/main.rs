@@ -44,7 +44,7 @@ fn main() {
         .register_uri_scheme_protocol("plugin", plugins::protocol::plugin_protocol_handler)
         .manage(Mutex::new(app_state::AppState::new()))
         .invoke_handler(tauri::generate_handler![
-            commands::app::get_app_config,
+            commands::app::get_app_state,
             commands::app::get_startup_messages,
             commands::logging::log,
             commands::plugins::get_plugins,

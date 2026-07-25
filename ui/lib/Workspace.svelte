@@ -1,8 +1,8 @@
 <!--
   @component Workspace
 
-  Main workspace layout component with dock panels.
-  Provides a flexible layout system with dock areas on left, right, and bottom sides.
+  Main workspace layout shell with dock areas on left, right, and bottom.
+  Dock content is provided by the consumer via snippets.
 
   ## Layout Structure
   ```
@@ -16,35 +16,62 @@
   └───────┴─────────────────┴───────┘
   ```
 -->
+<script lang="ts" module>
+  export type DockArea = "left" | "right" | "bottom";
+
+  export const DEFAULT_DOCK_SIZES: Record<DockArea, number> = {
+    left: 200,
+    right: 200,
+    bottom: 200,
+  };
+</script>
+
 <script lang="ts">
   import type { Snippet } from "svelte";
-  import Layout from "./Layout.svelte";
 
   interface Props {
     centralContent: Snippet;
+    left?: Snippet;
+    right?: Snippet;
+    bottom?: Snippet;
+    /** Collapse dock when true (default true). Host typically drives from content emptiness. */
+    leftEmpty?: boolean;
+    rightEmpty?: boolean;
+    bottomEmpty?: boolean;
+    /** When omitted, uses {@link DEFAULT_DOCK_SIZES} (200px each). */
+    dockSizes?: Record<DockArea, number>;
+    onDockSizeChange?: (area: DockArea, size: number) => void;
   }
 
-  let { centralContent }: Props = $props();
+  let {
+    centralContent,
+    left,
+    right,
+    bottom,
+    leftEmpty = true,
+    rightEmpty = true,
+    bottomEmpty = true,
+    dockSizes: dockSizesProp,
+    onDockSizeChange,
+  }: Props = $props();
 
-  let leftDock: ReturnType<typeof Layout> = $state()!;
-  let rightDock: ReturnType<typeof Layout> = $state()!;
-  let bottomDock: ReturnType<typeof Layout> = $state()!;
-  let isLeftEmpty = $state(true);
-  let isRightEmpty = $state(true);
-  let isBottomEmpty = $state(true);
-  let leftWidth = $state(200);
-  let rightWidth = $state(200);
-  let bottomHeight = $state(150);
+  let localDockSizes = $state<Record<DockArea, number>>({ ...DEFAULT_DOCK_SIZES });
+  let dockSizes = $derived(dockSizesProp ?? localDockSizes);
 
-  export function addWidgetToDock(area: "left" | "right" | "bottom", content: Snippet) {
-    if (area === "left") leftDock.addWidget(content);
-    else if (area === "right") rightDock.addWidget(content);
-    else if (area === "bottom") bottomDock.addWidget(content);
+  let isLeftCollapsed = $derived(leftEmpty || left == null);
+  let isRightCollapsed = $derived(rightEmpty || right == null);
+  let isBottomCollapsed = $derived(bottomEmpty || bottom == null);
+
+  function applyDockSize(area: DockArea, size: number): void {
+    onDockSizeChange?.(area, size);
+    if (dockSizesProp === undefined) {
+      localDockSizes = { ...localDockSizes, [area]: size };
+    }
   }
 
   let resizeOffset = { x: 0, y: 0 };
 
-  let resizingArea = $state<"left" | "right" | "bottom" | null>(null);
+  let resizingArea = $state<DockArea | null>(null);
   let isInteracting = $derived(resizingArea !== null);
 
   $effect(() => {
@@ -81,11 +108,11 @@
       y: event.clientY,
     };
     if (resizingArea === "left") {
-      leftWidth += posX;
+      applyDockSize("left", dockSizes.left + posX);
     } else if (resizingArea === "right") {
-      rightWidth -= posX;
+      applyDockSize("right", dockSizes.right - posX);
     } else if (resizingArea === "bottom") {
-      bottomHeight -= posY;
+      applyDockSize("bottom", dockSizes.bottom - posY);
     }
   }
 
@@ -93,7 +120,7 @@
     resizingArea = null;
   }
 
-  function startResizing(event: MouseEvent, area: "left" | "right" | "bottom") {
+  function startResizing(event: MouseEvent, area: DockArea) {
     event.preventDefault();
     if (event.button !== 0) return;
 
@@ -107,12 +134,12 @@
 
 <div
   class="workspace"
-  style:--left-width={isLeftEmpty ? "0px" : leftWidth + "px"}
-  style:--right-width={isRightEmpty ? "0px" : rightWidth + "px"}
-  style:--bottom-height={isBottomEmpty ? "0px" : bottomHeight + "px"}
+  style:--left-width={isLeftCollapsed ? "0px" : dockSizes.left + "px"}
+  style:--right-width={isRightCollapsed ? "0px" : dockSizes.right + "px"}
+  style:--bottom-height={isBottomCollapsed ? "0px" : dockSizes.bottom + "px"}
 >
-  <div class="left-dock" class:hidden={isLeftEmpty}>
-    <Layout bind:this={leftDock} bind:isEmpty={isLeftEmpty} orientation="vertical" />
+  <div class="left-dock" class:hidden={isLeftCollapsed}>
+    {@render left?.()}
     <div
       class="resize-handle resize-handle-vertical"
       class:resizing={resizingArea === "left"}
@@ -123,23 +150,23 @@
   <div class="central-content">
     {@render centralContent()}
   </div>
-  <div class="bottom-dock" class:hidden={isBottomEmpty}>
+  <div class="bottom-dock" class:hidden={isBottomCollapsed}>
     <div
       class="resize-handle resize-handle-horizontal"
       class:resizing={resizingArea === "bottom"}
       onmousedown={(e) => startResizing(e, "bottom")}
       aria-hidden="true"
     ></div>
-    <Layout bind:this={bottomDock} bind:isEmpty={isBottomEmpty} orientation="horizontal" />
+    {@render bottom?.()}
   </div>
-  <div class="right-dock" class:hidden={isRightEmpty}>
+  <div class="right-dock" class:hidden={isRightCollapsed}>
     <div
       class="resize-handle resize-handle-vertical"
       class:resizing={resizingArea === "right"}
       onmousedown={(e) => startResizing(e, "right")}
       aria-hidden="true"
     ></div>
-    <Layout bind:this={rightDock} bind:isEmpty={isRightEmpty} orientation="vertical" />
+    {@render right?.()}
   </div>
 </div>
 

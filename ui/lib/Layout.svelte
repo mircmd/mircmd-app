@@ -47,10 +47,24 @@
 
   export type LayoutItem = {
     id?: string;
+    visible?: boolean;
     snippet?: Snippet;
     component?: Component<any>;
     props?: Record<string, any>;
   };
+
+  export type LayoutItemHandle = {
+    id: string;
+    setVisible(visible: boolean): void;
+    remove(): void;
+  };
+
+  export type LayoutWidgetInput =
+    | Snippet
+    | {
+        component: Component<any>;
+        props?: Record<string, any>;
+      };
 </script>
 
 <script lang="ts">
@@ -76,14 +90,39 @@
   );
 
   $effect(() => {
+    // TODO: treat as empty when no *visible* items remain
     isEmpty = layoutItems.length === 0;
   });
 
-  export function addWidget(widget: Snippet) {
-    layoutItems.push({
-      id: generateId(),
-      snippet: widget,
-    });
+  export function addWidget(widget: LayoutWidgetInput): LayoutItemHandle {
+    const id = generateId();
+    if (typeof widget === "function") {
+      layoutItems.push({
+        id,
+        visible: true,
+        snippet: widget,
+      });
+    } else {
+      layoutItems.push({
+        id,
+        visible: true,
+        component: widget.component,
+        props: widget.props ?? {},
+      });
+    }
+
+    return {
+      id,
+      setVisible: (visible: boolean) => {
+        // TODO: update item.visible and recompute isEmpty / separators
+        const item = layoutItems.find((entry) => entry.id === id);
+        if (item) item.visible = visible;
+      },
+      remove: () => {
+        // TODO: idempotent remove
+        layoutItems = layoutItems.filter((entry) => entry.id !== id);
+      },
+    };
   }
 </script>
 

@@ -5,8 +5,8 @@
   Provides a tab bar with selectable tabs and associated content area.
 
   ## TODO
-  - Опция растягивания TabBar на всю ширину контейнера
-  - Опциональная иконка для таба. Располагать слева от названия таба.
+  - Option to stretch the TabBar to the full width of the container
+  - Optional icon for the tab. Place it to the left of the tab name.
 -->
 
 <script lang="ts" module>

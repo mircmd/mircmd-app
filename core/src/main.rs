@@ -44,10 +44,14 @@ fn main() {
         .register_uri_scheme_protocol("plugin", plugins::protocol::plugin_protocol_handler)
         .manage(Mutex::new(app_state::AppState::new()))
         .invoke_handler(tauri::generate_handler![
-            commands::app::get_app_config,
+            commands::app::get_app_state,
             commands::app::get_startup_messages,
             commands::logging::log,
+            commands::logging::append_console_line,
             commands::plugins::get_plugins,
+            commands::fs::save_file_dialog,
+            commands::fs::get_cwd,
+            commands::fs::write_file,
             commands::project::get_project_root_node,
             commands::project::get_project_node_by_id,
             commands::project::get_project_node_data_by_id,

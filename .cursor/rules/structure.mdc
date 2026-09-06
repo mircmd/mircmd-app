@@ -1,8 +1,0 @@
----
-alwaysApply: true
----
-
-The project has the following structure:
-
-- src-tauri – Core libraries, algorithms, and logic.
-- ui – UI components for rendering the user interface. Written with Svelte v5

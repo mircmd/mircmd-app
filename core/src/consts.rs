@@ -2,8 +2,6 @@ use directories::UserDirs;
 use std::path::PathBuf;
 use std::sync::OnceLock;
 
-pub const BASE_URL: &str = "https://mircmd.com";
-
 #[derive(Debug)]
 pub struct Dirs {
     pub config: PathBuf,

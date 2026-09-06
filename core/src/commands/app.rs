@@ -4,7 +4,7 @@ use std::sync::Mutex;
 use tauri;
 
 #[tauri::command]
-pub fn get_app_config(state: tauri::State<Mutex<AppState>>) -> Config {
+pub fn get_app_state(state: tauri::State<Mutex<AppState>>) -> Config {
     let app = state.lock().unwrap();
 
     app.config.clone()

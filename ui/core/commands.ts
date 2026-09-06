@@ -1,14 +1,47 @@
+import type { SaveDialogFilter, SaveDialogOptions } from '@mircmd/extensions-api';
 import { invoke } from '@tauri-apps/api/core';
 
 export const isDesktop = '__TAURI_INTERNALS__' in window;
 
-import type { AppConfig, LogMessage, ProjectNode, PluginInfo } from './types';
+import { type AppState, DockPosition, Language } from './app_state';
+import type { LogMessage, PluginInfo, ProjectNode } from './types';
 
-const defaultConfig: AppConfig = {
-  language: 'system',
+export type { SaveDialogFilter, SaveDialogOptions };
+
+
+const defaultAppState: AppState = {
+  language: Language.System,
   window: {
     pos: [0, 0],
     size: [1024, 768],
+  },
+  workspace: {
+    docks: {
+      left: {
+        visible: true,
+        size: 200,
+      },
+      right: {
+        visible: true,
+        size: 350,
+      },
+      bottom: {
+        visible: true,
+        size: 150,
+      },
+    },
+    panels: [
+      {
+        id: 'builtin:explorer',
+        dock_position: DockPosition.Left,
+        visible: true,
+      },
+      {
+        id: 'builtin:console-output',
+        dock_position: DockPosition.Bottom,
+        visible: true,
+      }
+    ],
   },
 };
 
@@ -32,13 +65,13 @@ export const log = {
     isDesktop ? invoke('log', { level: 'trace', message }) : console.trace(message),
 };
 
-export async function getAppConfig(): Promise<AppConfig> {
-  if (!isDesktop) return defaultConfig;
+export async function getAppState(): Promise<AppState> {
+  if (!isDesktop) return defaultAppState;
   try {
-    return await invoke<AppConfig>('get_app_config');
+    return await invoke<AppState>('get_app_state');
   } catch (e) {
     log.error(`Failed to get app config: ${e}`);
-    return defaultConfig;
+    return defaultAppState;
   }
 }
 
@@ -101,4 +134,45 @@ export async function getPlugins(): Promise<PluginInfo[]> {
     log.error(`Failed to get plugins: ${e}`);
     return [];
   }
-};
+}
+
+export async function saveFileDialog(
+  options: SaveDialogOptions = {},
+): Promise<string | null> {
+  if (!isDesktop) return null;
+  try {
+    return await invoke<string | null>('save_file_dialog', {
+      defaultPath: options.defaultPath ?? null,
+      filters: options.filters ?? null,
+    });
+  } catch (e) {
+    log.error(`Failed to open save dialog: ${e}`);
+    return null;
+  }
+}
+
+export async function getCwd(): Promise<string> {
+  if (!isDesktop) return '';
+  try {
+    return await invoke<string>('get_cwd');
+  } catch (e) {
+    log.error(`Failed to get current working directory: ${e}`);
+    return '';
+  }
+}
+
+export async function writeFile(path: string, data: Uint8Array): Promise<void> {
+  if (!isDesktop) {
+    throw new Error('File writing is only available in the desktop app');
+  }
+  await invoke('write_file', { path, data: Array.from(data) });
+}
+
+export function appendConsoleLine(level: 'info' | 'error', message: string): void {
+  if (!isDesktop) {
+    if (level === 'error') console.error(message);
+    else console.info(message);
+    return;
+  }
+  void invoke('append_console_line', { level, message });
+}

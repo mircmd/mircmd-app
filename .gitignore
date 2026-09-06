@@ -1,12 +1,15 @@
 .DS_Store
+
 .idea
+.vscode
+.zed
 
 tmp/
 dist/
 target/
 node_modules/
 logs/
-/src-tauri/gen/schemas
+/core/gen/schemas
 
 /*.png
 /*.jpg

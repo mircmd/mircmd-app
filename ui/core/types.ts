@@ -1,16 +1,10 @@
-export interface Window {
-  pos: [number, number];
-  size: [number, number];
-}
+import type { PluginMetadata } from "@mircmd/extensions-api";
 
-export interface AppConfig {
-  language: 'system' | 'english' | 'russian';
-  window: Window;
-}
+export type { PluginMetadata };
 
 export interface LogMessage {
   message: string;
-  level: "debug" | "info" | "warning" | "error";
+  level: 'debug' | 'info' | 'warning' | 'error';
 }
 
 export interface ProjectNode {
@@ -21,27 +15,24 @@ export interface ProjectNode {
 }
 
 export enum PluginTarget {
-  Core = 'Core',
-  Ui = 'Ui',
+  Core = 'core',
+  Ui = 'ui',
 }
 
 export enum PluginType {
-  Icons = 'Icons',
-  FileImporter = 'FileImporter',
-  Program = 'Program',
+  Icons = 'icons',
+  FileImporter = 'file_importer',
+  Program = 'program',
 }
 
-export interface PluginMetadata {
-  id: string;
-  name: string;
-  version: string;
-  publisher: string;
-  description: string;
+export enum PluginProtocol {
+  V1 = 'v1',
 }
 
 export interface PluginManifest {
   target: PluginTarget;
   type: PluginType;
+  protocol: PluginProtocol;
   metadata: PluginMetadata;
 }
 

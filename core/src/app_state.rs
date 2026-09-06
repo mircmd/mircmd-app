@@ -14,9 +14,7 @@ use uuid::Uuid;
 
 #[derive(Clone, Serialize)]
 pub enum LogLevel {
-    Debug,
     Info,
-    Warning,
     Error,
 }
 

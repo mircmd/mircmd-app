@@ -1,25 +1,23 @@
-import { getPlugins, log } from "../core/commands";
-import type { PluginMetadata } from "../core/types";
-import type { ProgramPluginContext } from "./program_plugin_context";
+import { getPlugins, log } from "./commands";
+import type { PluginMetadata } from "./types";
+import { PluginProtocol } from "./types";
+import {
+  wrapProgramPlugin,
+  type ProgramPluginDescriptor,
+} from "./program_plugin_runtime";
 
-export interface ProgramPlugin {
-  run: (ctx: ProgramPluginContext, node_type: string, node_data: Uint8Array) => string;
-  supportedTypes: () => string[];
-  metadata: () => PluginMetadata;
-}
-
-const PLUGIN_BASE_URL = 'plugin://localhost';
+const PLUGIN_BASE_URL = "plugin://localhost";
 
 class PluginManager {
   icons = new Map<string, string>();
-  programs = new Map<string, ProgramPlugin[]>();
+  programs = new Map<string, ProgramPluginDescriptor[]>();
 
-  constructor() { }
+  constructor() {}
 
   private async loadPlugin(pluginPath: string): Promise<any> {
     const moduleUrl = `${PLUGIN_BASE_URL}/${pluginPath}/plugin.js`;
     const module = await import(moduleUrl);
-    if (typeof module.instantiate !== 'function') {
+    if (typeof module.instantiate !== "function") {
       throw new Error(`Plugin ${pluginPath} does not export instantiate function`);
     }
     return module;
@@ -36,21 +34,22 @@ class PluginManager {
     }
   }
 
-  private async loadProgramPlugin(pluginPath: string, metadata: PluginMetadata) {
+  private async loadProgramPlugin(
+    pluginPath: string,
+    metadata: PluginMetadata,
+    protocol: PluginProtocol,
+  ) {
     try {
       const pluginModule = await this.loadPlugin(pluginPath);
       const pluginInstance = await pluginModule.instantiate();
-      const programPlugin: ProgramPlugin = {
-        run: pluginInstance.run,
-        supportedTypes: pluginInstance.supportedTypes,
-        metadata: () => metadata,
-      };
-      for (const t of pluginInstance.supportedTypes()) {
+      const descriptor = wrapProgramPlugin(pluginInstance, metadata, pluginPath, protocol);
+
+      for (const t of descriptor.supportedTypes) {
         const existing = this.programs.get(t);
         if (existing) {
-          existing.push(programPlugin);
+          existing.push(descriptor);
         } else {
-          this.programs.set(t, [programPlugin]);
+          this.programs.set(t, [descriptor]);
         }
       }
     } catch (error) {
@@ -65,10 +64,14 @@ class PluginManager {
       this.icons.clear();
       this.programs.clear();
       for (const plugin of plugins) {
-        if (plugin.manifest.target === "Ui" && plugin.manifest.type === "Icons") {
+        if (plugin.manifest.target === "ui" && plugin.manifest.type === "icons") {
           await this.loadIconsPlugin(plugin.path);
-        } else if (plugin.manifest.target === "Ui" && plugin.manifest.type === "Program") {
-          await this.loadProgramPlugin(plugin.path, plugin.manifest.metadata);
+        } else if (plugin.manifest.target === "ui" && plugin.manifest.type === "program") {
+          await this.loadProgramPlugin(
+            plugin.path,
+            plugin.manifest.metadata,
+            plugin.manifest.protocol ?? PluginProtocol.V1,
+          );
         }
       }
     } catch (error) {

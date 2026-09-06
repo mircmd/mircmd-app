@@ -3,7 +3,7 @@
  * Creates an isolated Shadow DOM mount point with stylesheet injection.
  */
 
-import type { PluginSurface } from "./program_plugin_api";
+import type { PluginSurface } from "@mircmd/extensions-api";
 
 export type PluginSurfaceHandle = PluginSurface & {
   dispose(): void;
@@ -15,6 +15,17 @@ type SurfaceState = {
 };
 
 const surfaceState = new WeakMap<PluginSurfaceHandle, SurfaceState>();
+
+const pluginThemeSheet = new CSSStyleSheet();
+pluginThemeSheet.replaceSync(`
+:host {
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  color: inherit;
+  line-height: inherit;
+}
+`);
 
 /**
  * Attach or reuse an open ShadowRoot on `host`.
@@ -30,6 +41,7 @@ function ensureOpenShadow(host: HTMLElement): ShadowRoot {
 
 function buildSurface(host: HTMLElement, ownedHost: boolean): PluginSurfaceHandle {
   const root = ensureOpenShadow(host);
+  root.adoptedStyleSheets = [pluginThemeSheet];
 
   const surface: PluginSurfaceHandle = {
     host,

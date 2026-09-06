@@ -1,11 +1,32 @@
+import type {
+  ContextMenuParams,
+  ProgramFs,
+  ProgramLog,
+  ProgramNodeIdentity,
+  ProgramPluginContext,
+} from "@mircmd/extensions-api";
+import { appendConsoleLine, getCwd, saveFileDialog, writeFile } from "./commands";
 import { getContextMenu } from "./context_menu.svelte";
-import type { ContextMenuParams } from "./context_menu_types";
-import type { ProgramNodeIdentity, ProgramPluginContext } from "./program_plugin_api";
 import { adoptPluginSurface, type PluginSurfaceHandle } from "./plugin_surface";
 
 export type { ProgramPluginContext };
 
 const contextMenu = getContextMenu();
+
+export function createProgramFs(): ProgramFs {
+  return {
+    getCwd,
+    showSaveDialog: (options) => saveFileDialog(options),
+    writeFile,
+  };
+}
+
+function createProgramLog(): ProgramLog {
+  return {
+    info: (message) => appendConsoleLine("info", message),
+    error: (message) => appendConsoleLine("error", message),
+  };
+}
 
 export type CreateProgramPluginContextOptions = {
   signal?: AbortSignal;
@@ -38,6 +59,8 @@ export function createProgramPluginContext(
     root: surface.root,
     signal,
     node,
+    fs: createProgramFs(),
+    log: createProgramLog(),
     addStyles: (cssText) => surface.addStyles(cssText),
     contextMenu: {
       open: (params: ContextMenuParams) => contextMenu.open(params),

@@ -6,19 +6,20 @@
 -->
 <script lang="ts">
   import { onDestroy } from "svelte";
-
-  import Panel from "./lib/Panel.svelte";
-  import CollapsibleSection from "./lib/CollapsibleSection.svelte";
-  import type { ProgramManager, ProgramRecord } from "./core/program_manager.svelte";
-  import type { WorkspacePreferences } from "./core/workspace_state.svelte";
   import type {
     Cleanup,
     ControlPanelBlock,
     ControlPanelContribution,
     ProgramCommand,
-  } from "./core/program_plugin_api";
-  import { createPluginSurface, type PluginSurfaceHandle } from "./core/plugin_surface";
+  } from "@mircmd/extensions-api";
+
+  import CollapsibleSection from "./lib/CollapsibleSection.svelte";
+  import Panel from "./lib/Panel.svelte";
   import { log } from "./core/commands";
+  import type { ProgramManager, ProgramRecord } from "./core/program_manager.svelte";
+  import { createPluginSurface, type PluginSurfaceHandle } from "./core/plugin_surface";
+  import { createProgramFs } from "./core/program_plugin_context";
+  import type { WorkspacePreferences } from "./core/workspace_state.svelte";
 
   interface Props {
     pluginKey: string;
@@ -184,6 +185,7 @@
       block.mount(surface, {
         signal: abort.signal,
         dispatch: (command) => dispatchCommand(record, command, abort.signal),
+        fs: createProgramFs(),
       }),
     )
       .then(async (cleanup) => {

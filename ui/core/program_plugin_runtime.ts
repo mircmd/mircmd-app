@@ -2,13 +2,14 @@
  * Runtime boundary for dynamically loaded program plugin modules.
  */
 
-import { PluginProtocol, type PluginMetadata } from "./types";
 import type {
   ControlPanelContribution,
+  PluginMetadata,
   ProgramPlugin,
   ProgramPluginContext,
   ProgramSession,
-} from "./program_plugin_api";
+} from "@mircmd/extensions-api";
+import { PluginProtocol } from "./types";
 
 export type ProgramPluginDescriptor = {
   key: string;

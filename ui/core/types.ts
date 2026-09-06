@@ -1,3 +1,7 @@
+import type { PluginMetadata } from "@mircmd/extensions-api";
+
+export type { PluginMetadata };
+
 export interface LogMessage {
   message: string;
   level: 'debug' | 'info' | 'warning' | 'error';
@@ -23,14 +27,6 @@ export enum PluginType {
 
 export enum PluginProtocol {
   V1 = 'v1',
-}
-
-export interface PluginMetadata {
-  id: string;
-  name: string;
-  version: string;
-  publisher: string;
-  description: string;
 }
 
 export interface PluginManifest {

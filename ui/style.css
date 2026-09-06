@@ -10,6 +10,41 @@
   font-style: normal;
 }
 
+:root {
+  --mircmd-font-family: Inter;
+  --mircmd-font-size: 12.5px;
+  --mircmd-font-weight: 450;
+  --mircmd-text-color: #000000;
+  --mircmd-control-radius: 4px;
+  --mircmd-control-height: 23px;
+  --mircmd-control-border: #b0b0b0;
+  --mircmd-control-bg: #ffffff;
+  --mircmd-button-bg: #f3f3f3;
+  --mircmd-button-bg-hover: #e8e8e8;
+  --mircmd-button-bg-active: #dcdcdc;
+  --mircmd-accent: #317ae7;
+  --mircmd-slider-track: #d0d0d0;
+  --mircmd-slider-thumb-border: #6a6a6a;
+  --mircmd-tree-border: #dadada;
+  --mircmd-tree-selected: #d0e4ff;
+  --mircmd-tree-selected-hover: #c0d8f8;
+  --mircmd-icon-size: 18px;
+  --mircmd-icon-backspace: url("./assets/icons/backspace.svg");
+  --mircmd-icon-collapsible-section-arrow: url("./assets/icons/collapsible_section_arrow.svg");
+  --mircmd-icon-delete: url("./assets/icons/delete.svg");
+  --mircmd-icon-menu-arrow: url("./assets/icons/menu_arrow.svg");
+  --mircmd-icon-tab-close: url("./assets/icons/tab_close.svg");
+  --mircmd-icon-tree-arrow: url("./assets/icons/tree_arrow.svg");
+  --mircmd-icon-tree-file: url("./assets/icons/tree_file.svg");
+  --mircmd-icon-tree-folder: url("./assets/icons/tree_folder.svg");
+  --mircmd-icon-visibility: url("./assets/icons/visibility.svg");
+  --mircmd-icon-visibility-off: url("./assets/icons/visibility_off.svg");
+  --mircmd-icon-window-close: url("./assets/icons/window_close.svg");
+  --mircmd-icon-window-collapse: url("./assets/icons/window_collapse.svg");
+  --mircmd-icon-window-expand: url("./assets/icons/window_expand.svg");
+  --mircmd-icon-window-hide: url("./assets/icons/window_hide.svg");
+}
+
 html,
 body {
   height: 100%;
@@ -18,10 +53,10 @@ body {
 }
 
 * {
-  font-family: Inter;
-  font-weight: 450;
-  font-size: 12.5px;
-  color: #000000;
+  font-family: var(--mircmd-font-family);
+  font-weight: var(--mircmd-font-weight);
+  font-size: var(--mircmd-font-size);
+  color: var(--mircmd-text-color);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;

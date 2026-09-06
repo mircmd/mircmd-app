@@ -6,11 +6,11 @@
  * session per plugin key), not the globally active workspace window.
  */
 
+import type { ProgramCommand, ProgramSession } from "@mircmd/extensions-api";
 import type WindowManager from "../lib/WindowManager.svelte";
 import type { WindowHandle } from "../lib/WindowManager.svelte";
 import { getProjectNodeDataById, log } from "./commands";
 import { createProgramPluginContext } from "./program_plugin_context";
-import type { ProgramCommand, ProgramSession } from "./program_plugin_api";
 import {
   runProgramPlugin,
   type ProgramPluginDescriptor,

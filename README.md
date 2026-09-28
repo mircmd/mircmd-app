@@ -1,18 +1,10 @@
-# Attention
-
-Since the project demonstrated its necessity, a strategic decision was made to further develop the product using a new technology stack based on various technical considerations. No new changes will be made here. We have opened several new repositories for further development:
-
-- [Mir Commander](https://github.com/mircmd/mircmd-app)
-- [Mir Commander Chemistry Plugins](https://github.com/mircmd/mircmd-chemistry-plugins)
-
 # Mir Commander
 
-The primary goal of this project is the creation of a graphical user interface (GUI) for scientific modeling
-using the [Mir](https://mir.vishnevskiy.group) language and [UNEX](https://unex.vishnevskiy.group) program.
-UNEX is well-established software for molecular structure refinement.
-Accordingly, Mir Commander is able to visualize molecular structures as well as other types of numerical data.
+**Mir Commander** is an integrated environment for scientific and engineering software. Its main purpose is to provide a common basis for different extensions, which in turn implement functionality for data processing, simulations, etc. In particular, here is developed the cental graphical user interface (GUI), methods for manipulating with data objects, intercommunication between extensions and their synchronization.
 
-Currently, we are focused on the very basic functionality that allows visualizing molecules from files in the standard XYZ format.
+On the basis of Mir Commander have been created [chemistry extensions](https://github.com/mircmd/mircmd-chemistry-extensions) for supporting molecular modeling, including structure visualization and manipulation, plotting of orbitals, high-resolution image saving.
+
+Currently, in Mir Commander we are focused on the development of basic functionality and stable API that allows reliable operation of extensions.
 
 ## Development
 
@@ -27,7 +19,7 @@ make init
 In case of problems with finding the default expected version of Python, you may want to indicate your version explicitly, for example:
 
 ```shell
-PYTHON=python3.13 make init
+PYTHON=python3.14 make init
 ```
 
 The development version of Mir Commander can now be started as

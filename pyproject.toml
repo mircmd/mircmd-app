@@ -2,18 +2,19 @@
 name = "mir-commander"
 description = "A modern, powerful graphical user interface for molecular structure modeling."
 license-files = ["resources/policy/LICENSE.txt"]
-requires-python = ">=3.13"
+requires-python = "~=3.14"
 dependencies = [
-    "cclib>=1.8.1",
-    "httpx>=0.28.1",
-    "numpydantic>=1.6.9",
-    "pillow>=11.3.0",
-    "pydantic>=2.11.4",
-    "pydantic-extra-types>=2.10.5",
-    "pyopengl>=3.1.10",
-    "pyopengl-accelerate>=3.1.10",
-    "pyside6-essentials>=6.9.3",
-    "pyyaml>=6.0.2",
+    "mir-commander-file-importer-host",
+    "httpx~=0.28.1",
+    "numpy~=2.5.3",
+    "pillow~=12.3.0",
+    "pydantic~=2.13.0",
+    "pydantic-extra-types~=2.11.1",
+    "pyopengl~=3.1.10",
+    "pyopengl-accelerate~=3.1.10",
+    "pyside6-essentials~=6.11.2",
+    "pyyaml~=6.0.3",
+    "wasmtime~=49.0.0",
 ]
 dynamic = ["version"]
 
@@ -26,19 +27,22 @@ build-backend = "hatchling.build"
 
 [dependency-groups]
 dev = [
-    "cython>=3.2.1",
-    "setuptools>=80.9.0",
-    "mypy>=1.17.1",
-    "pre-commit>=4.3.0",
-    "pre-commit-hooks>=6.0.0",
-    "pytest>=8.4.1",
-    "pytest-cov>=6.2.1",
-    "ruff>=0.12.9",
-    "types-pyyaml>=6.0.12.20250822",
-    "cx-freeze>=8.5.0",
+    "cython~=3.3.0",
+    "setuptools~=84.0.0",
+    "mypy~=2.3.1",
+    "pre-commit~=4.6.2",
+    "pre-commit-hooks~=6.0.0",
+    "pytest~=9.1.1",
+    "pytest-cov~=7.1.0",
+    "ruff~=0.16.9",
+    "types-pyyaml~=6.0.12.20260906",
+    "cx-freeze~=8.7.1",
 ]
 
 [tool.uv]
+
+[tool.uv.sources]
+mir-commander-file-importer-host = { path = "mir_commander_file_importer_host" }
 
 [[tool.uv.index]]
 url = "https://pypi.org/simple"
@@ -51,7 +55,7 @@ path = "mir_commander/__init__.py"
 py-modules = []
 
 [tool.setuptools.dynamic]
-version = {attr = "mir_commander.__version__"}
+version = { attr = "mir_commander.__version__" }
 
 [tool.mypy]
 ignore_missing_imports = true
@@ -94,22 +98,44 @@ packages = [
     "numpy.f2py",
     "numpy.testing",
 ]
-excludes = [
-    "cython",
-    "pytest",
-    "setuptools",
-    "tkinter",
-]
+excludes = ["cython", "pytest", "setuptools", "tkinter"]
 include_files = [
-    ["resources/policy/LICENSE.txt", "LICENSE.txt"],
-    ["resources/resources.rcc", "resources/resources.rcc"],
-    ["build/lib/plugins", "plugins"],
-    ["plugins/builtin/file_exporters/loader.py", "plugins/builtin/file_exporters/loader.py"],
-    ["plugins/builtin/file_importers/loader.py", "plugins/builtin/file_importers/loader.py"],
-    ["plugins/builtin/programs/loader.py", "plugins/builtin/programs/loader.py"],
-    ["plugins/builtin/project_nodes/loader.py", "plugins/builtin/project_nodes/loader.py"],
-    ["plugins/builtin/resources/loader.py", "plugins/builtin/resources/loader.py"],
-    ["plugins/builtin/resources/resources.rcc", "plugins/builtin/resources/resources.rcc"],
+    [
+        "resources/policy/LICENSE.txt",
+        "LICENSE.txt",
+    ],
+    [
+        "resources/resources.rcc",
+        "resources/resources.rcc",
+    ],
+    [
+        "build/lib/plugins",
+        "plugins",
+    ],
+    [
+        "plugins/builtin/file_exporters/loader.py",
+        "plugins/builtin/file_exporters/loader.py",
+    ],
+    [
+        "plugins/builtin/file_importers/loader.py",
+        "plugins/builtin/file_importers/loader.py",
+    ],
+    [
+        "plugins/builtin/programs/loader.py",
+        "plugins/builtin/programs/loader.py",
+    ],
+    [
+        "plugins/builtin/project_nodes/loader.py",
+        "plugins/builtin/project_nodes/loader.py",
+    ],
+    [
+        "plugins/builtin/resources/loader.py",
+        "plugins/builtin/resources/loader.py",
+    ],
+    [
+        "plugins/builtin/resources/resources.rcc",
+        "plugins/builtin/resources/resources.rcc",
+    ],
 ]
 include_msvcr = true
 

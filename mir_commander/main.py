@@ -5,17 +5,18 @@ import shutil
 import sys
 from pathlib import Path
 
-from . import __version__
-from .core import logging, plugins_loader
-from .core.consts import DIR, FROZEN
-from .ui.application import Application
+from mir_commander import __version__, logging
+from mir_commander.application import Application
+from mir_commander.consts import DIR, FROZEN
+from mir_commander.extensions.errors import ExtensionsManagerError
+from mir_commander.extensions.extensions_manager import ExtensionsManager
 
 PLATFORM = platform.system().lower()
 logger = logging.getLogger("Main")
 
 
 def _setup_app_directories():
-    for d in (DIR.HOME_MIRCMD, DIR.MIRCMD_BIN, DIR.MIRCMD_PLUGINS, DIR.MIRCMD_LOGS):
+    for d in (DIR.HOME_MIRCMD, DIR.MIRCMD_BIN, DIR.MIRCMD_EXTENSIONS, DIR.MIRCMD_LOGS):
         if not d.exists():
             d.mkdir(parents=True, exist_ok=True)
 
@@ -125,19 +126,15 @@ def main():
 
     _setup_cwd()
 
-    app = Application([])
+    extensions_manager = ExtensionsManager()
+    try:
+        extensions_manager.load_extensions(DIR.MIRCMD_EXTENSIONS)
+    except ExtensionsManagerError as e:
+        logger.error("Failed to load extensions from %s: %s", DIR.MIRCMD_EXTENSIONS, e)
 
-    logger.debug("Loading built-in plugins ...")
-    resources = plugins_loader.load_from_directory(DIR.INTERNAL_PLUGINS)
-    app.register_plugin_resources(resources)
+    app = Application(extensions_manager, [])
 
-    logger.debug("Loading external plugins ...")
-    resources = plugins_loader.load_from_directory(DIR.MIRCMD_PLUGINS, skip_authors=["builtin"])
-    app.register_plugin_resources(resources)
+    for file in args.files:
+        app.project_window.import_file(file)
 
-    if args.files:
-        sys.exit(app.open_temporary_project(args.files))
-    elif args.project:
-        sys.exit(app.open_project(args.project))
-    else:
-        sys.exit(app.open_empty_project())
+    sys.exit(app.run())

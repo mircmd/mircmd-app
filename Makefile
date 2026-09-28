@@ -1,5 +1,5 @@
 CODE=mir_commander plugins tests
-PYTHON?=python3.13
+PYTHON?=python3.14
 VIRTUAL_ENV?=.venv
 COLOUR_GREEN=\033[0;32m
 COLOUR_RED=\033[0;31m

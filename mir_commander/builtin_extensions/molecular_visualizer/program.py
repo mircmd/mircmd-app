@@ -3,12 +3,12 @@ from pathlib import Path
 from typing import Any, cast
 
 from OpenGL.GL import GL_VERSION, glGetString
-from PIL import Image, ImageCms
 from PySide6.QtGui import QIcon, QOffscreenSurface, QOpenGLContext, QStandardItem, QSurfaceFormat
 from PySide6.QtWidgets import QWidget
 
 from mir_commander.builtin_extensions.molecular_visualizer.config import Config
 from mir_commander.builtin_extensions.molecular_visualizer.graphics.utils import Color4f
+from mir_commander.builtin_extensions.molecular_visualizer.utils import save_image
 from mir_commander.builtin_extensions.molecular_visualizer.visualizer import Visualizer
 from mir_commander.builtin_extensions.utils.data_structures.atomic_coordinates import (
     AddAtomAction,
@@ -180,13 +180,10 @@ class MolecularVisualizerProgram(BaseProgram):
 
         try:
             image = self.visualizer.render_to_image(width, height, bg_color, crop_to_content)
-            profile = ImageCms.createProfile("sRGB")
-            Image.fromarray(image).save(t_filename, icc_profile=ImageCms.ImageCmsProfile(profile).tobytes())
+            save_image(image, t_filename)
             self.send_message_signal.emit(MessageChannel.CONSOLE, self.tr("{} saved successfully").format(t_filename))
-        except Exception as e:
-            txt = self.tr("Error saving image {}").format(t_filename)
-            logger.error(f"{txt}: {e}")
-            self.send_message_signal.emit(MessageChannel.CONSOLE, txt)
+        except Exception:
+            self.send_message_signal.emit(MessageChannel.CONSOLE, self.tr("Error saving image {}").format(t_filename))
 
     def get_title(self) -> str:
         return self._node_full_name

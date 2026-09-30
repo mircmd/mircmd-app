@@ -1,7 +1,6 @@
 import logging
 from typing import TYPE_CHECKING, cast
 
-from PIL import Image, ImageCms
 from PySide6.QtCore import QPoint
 from PySide6.QtGui import QContextMenuEvent
 from PySide6.QtWidgets import QInputDialog, QLineEdit, QMessageBox
@@ -46,6 +45,7 @@ from mir_commander.builtin_extensions.molecular_visualizer.opengl.text_overlay i
 from mir_commander.builtin_extensions.molecular_visualizer.save_image_dialog import SaveImageDialog
 from mir_commander.builtin_extensions.molecular_visualizer.shaders import fragment, vertex
 from mir_commander.builtin_extensions.molecular_visualizer.style import Style
+from mir_commander.builtin_extensions.molecular_visualizer.utils import save_image
 from mir_commander.builtin_extensions.utils.chemistry import symbol_to_atomic_number
 from mir_commander.builtin_extensions.utils.data_structures.atomic_coordinates import AtomicCoordinates
 from mir_commander.builtin_extensions.utils.data_structures.volume_cube import VolumeCube
@@ -414,13 +414,9 @@ class Visualizer(OpenGLWidget):
 
                 if image is not None:
                     try:
-                        profile = ImageCms.createProfile("sRGB")
-                        Image.fromarray(image).save(
-                            str(dlg.img_file_path), icc_profile=ImageCms.ImageCmsProfile(profile).tobytes()
-                        )
+                        save_image(image, str(dlg.img_file_path))
                         self._program.send_message_signal.emit(MessageChannel.STATUS, self.tr("Image saved"))
                     except Exception as e:
-                        logger.error("Could not save image: %s", e)
                         if isinstance(e, OSError):
                             message = self.tr("The path does not exist or is write-protected.")
                         elif isinstance(e, ValueError):

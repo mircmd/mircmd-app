@@ -20,10 +20,11 @@ class BaseControlPanel(ControlPanel):
 
         for block in self.get_blocks():
             vertical_stack.add_widget(block.title, block.widget, block.expanded)
-
         vertical_stack.addStretch(1)
 
-        return vertical_stack
+        widget = QWidget()
+        widget.setLayout(vertical_stack)
+        return widget
 
     def get_blocks(self) -> Iterable[BaseControlBlock]:
         raise NotImplementedError

@@ -1,5 +1,5 @@
 from PySide6.QtCore import QSignalBlocker, Qt
-from PySide6.QtWidgets import QCheckBox, QFrame, QScrollArea
+from PySide6.QtWidgets import QCheckBox, QFrame, QScrollArea, QVBoxLayout
 
 from mir_commander.app_config import AppConfig, ControlPanelState
 from mir_commander.sdk.program import ControlPanel
@@ -41,21 +41,21 @@ class ProgramControlPanelDock(DockWidget):
         scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
 
-        frame = QFrame(scroll_area)
-        control_panel_widget = control_panel.get_widget()
-        frame.setLayout(control_panel_widget)
-
-        scroll_area.setWidget(frame)
-
+        vbox_layout = QVBoxLayout()
+        vbox_layout.setContentsMargins(0, 0, 0, 0)
+        vbox_layout.setSpacing(0)
+        vbox_layout.addWidget(control_panel.get_widget())
         if control_panel.allows_apply_for_all():
             _apply_for_all_checkbox = QCheckBox(self.tr("Apply for all"))
             _apply_for_all_checkbox.setObjectName("mircmd-apply-for-all-checkbox")
             _apply_for_all_checkbox.setChecked(self._apply_for_all)
             _apply_for_all_checkbox.toggled.connect(self._apply_for_all_handler)
-        #     vertical_stack.addSpacing(10)
-        #     vertical_stack.addWidget(_apply_for_all_checkbox, alignment=Qt.AlignmentFlag.AlignHCenter)
-        #     vertical_stack.addSpacing(10)
-        # vertical_stack.addStretch(1)
+            vbox_layout.addWidget(_apply_for_all_checkbox, alignment=Qt.AlignmentFlag.AlignHCenter)
+        vbox_layout.addStretch(1)
+
+        frame = QFrame(scroll_area)
+        frame.setLayout(vbox_layout)
+        scroll_area.setWidget(frame)
 
         self.visibilityChanged.connect(self._visibility_changed_handler)
 

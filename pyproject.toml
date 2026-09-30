@@ -2,7 +2,7 @@
 name = "mir-commander"
 description = "A modern, powerful graphical user interface for molecular structure modeling."
 license-files = ["resources/policy/LICENSE.txt"]
-requires-python = "~=3.14"
+requires-python = ">=3.14.5, <4"
 dependencies = [
     "mir-commander-file-importer-host",
     "httpx~=0.28.1",

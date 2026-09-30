@@ -192,8 +192,8 @@ class MdiArea(QMdiArea):
 
     def open_program(self, item: QStandardItem, program_id: str, kwargs: dict[str, Any]):
         for window in self.subWindowList():
-            # checking if program for this node already opened
-            if window.program_id == program_id and window.program.node == item:
+            # checking if program for this item already opened
+            if window.program_id == program_id and window.program.item == item:
                 self.setActiveSubWindow(window)
                 window.show()
                 return

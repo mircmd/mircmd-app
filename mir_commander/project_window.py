@@ -28,7 +28,7 @@ from mir_commander.extensions.errors import FileExporterError, FileImporterError
 from mir_commander.item import Item
 from mir_commander.mdi_area import MdiArea
 from mir_commander.project_config import ProjectConfig
-from mir_commander.sdk.program import MessageChannel
+from mir_commander.sdk.base_program import MessageChannel
 from mir_commander.settings.settings_dialog import SettingsDialog
 from mir_commander.updates import ApplicationUpdateDialog, CheckForUpdatesBackgroundWorker, NewVersionNotification
 

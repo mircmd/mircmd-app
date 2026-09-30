@@ -21,17 +21,17 @@ from mir_commander.builtin_extensions.utils.data_structures.atomic_coordinates i
 )
 from mir_commander.builtin_extensions.utils.data_structures.volume_cube import bytes_to_volume_cube
 from mir_commander.errors import ProgramError
-from mir_commander.sdk.program import (
+from mir_commander.sdk.base_program import (
+    BaseProgram,
     MessageChannel,
     NodeChangedAction,
-    Program,
 )
 from mir_commander.utils import sanitize_filename
 
 logger = logging.getLogger(__name__)
 
 
-class MolecularVisualizerProgram(Program):
+class MolecularVisualizerProgram(BaseProgram):
     def __init__(self, all: bool = False, *args, **kwargs):
         self._check_opengl_version()
 
@@ -56,7 +56,6 @@ class MolecularVisualizerProgram(Program):
         self._set_draw_node()
         self.visualizer.set_atomic_coordinates(self._get_draw_node_atomic_coordinates())
         self.visualizer.coordinate_axes_adjust_length()
-
 
     def _check_opengl_version(self):
         """Check if OpenGL version is 3.3 or higher"""

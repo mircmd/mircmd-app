@@ -49,7 +49,7 @@ from mir_commander.builtin_extensions.molecular_visualizer.style import Style
 from mir_commander.builtin_extensions.utils.chemistry import symbol_to_atomic_number
 from mir_commander.builtin_extensions.utils.data_structures.atomic_coordinates import AtomicCoordinates
 from mir_commander.builtin_extensions.utils.data_structures.volume_cube import VolumeCube
-from mir_commander.sdk.program import MessageChannel
+from mir_commander.sdk.base_program import MessageChannel
 
 if TYPE_CHECKING:
     from mir_commander.builtin_extensions.molecular_visualizer.program import MolecularVisualizerProgram

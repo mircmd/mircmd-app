@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING, Any
 
 from mir_commander.builtin_extensions.cartesian_editor.control_elements.general import General
-from mir_commander.builtin_extensions.sdk.base_control_panel import BaseControlBlock, BaseControlPanel
+from mir_commander.builtin_extensions.sdk.base_control_panel import BaseControlPanel, ControlBlock
 
 if TYPE_CHECKING:
     from mir_commander.builtin_extensions.cartesian_editor.program import CartesianEditorProgram
@@ -11,12 +11,12 @@ class CartesianEditorControlPanel(BaseControlPanel):
     def __init__(self):
         super().__init__()
 
-        self._blocks = [BaseControlBlock(title=self.tr("General"), widget=General(self), expanded=True)]
+        self._blocks = [ControlBlock(title=self.tr("General"), widget=General(self), expanded=True)]
 
     def allows_apply_for_all(self) -> bool:
         return True
 
-    def get_blocks(self) -> list[BaseControlBlock]:
+    def get_blocks(self) -> list[ControlBlock]:
         return self._blocks
 
     def update_event(self, program: "CartesianEditorProgram", data: dict[Any, Any]):

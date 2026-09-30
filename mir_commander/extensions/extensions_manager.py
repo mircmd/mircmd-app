@@ -13,7 +13,7 @@ from mir_commander.builtin_extensions.molecular_visualizer.control_panel import 
 from mir_commander.builtin_extensions.molecular_visualizer.program import MolecularVisualizerProgram
 from mir_commander.extensions.errors import ExtensionsManagerError
 from mir_commander.extensions.manifest import ExtensionManifest, ExtensionProtocol, ExtensionType, Metadata
-from mir_commander.sdk.program import ControlPanel, Program
+from mir_commander.sdk.base_program import BaseControlPanel, BaseProgram
 
 logger = logging.getLogger(__name__)
 
@@ -44,8 +44,8 @@ class FileExporterExtension(Extension):
 @dataclass
 class ProgramExtension(Extension):
     supported_node_types: list[str]
-    program_cls: type[Program]
-    control_panel_cls: type[ControlPanel]
+    program_cls: type[BaseProgram]
+    control_panel_cls: type[BaseControlPanel]
 
 
 @dataclass

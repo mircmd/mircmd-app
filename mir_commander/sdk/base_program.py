@@ -14,7 +14,7 @@ class MessageChannel(Enum):
     STATUS = "status"
 
 
-class Program(QObject):
+class BaseProgram(QObject):
     send_message_signal = Signal(MessageChannel, str)
     node_changed_signal = Signal(int, NodeChangedAction)
     update_control_panel_signal = Signal(dict)
@@ -52,7 +52,7 @@ class Program(QObject):
         raise NotImplementedError
 
 
-class ControlPanel(QObject):
+class BaseControlPanel(QObject):
     program_action_signal = Signal(str, dict)
 
     def get_widget(self) -> QWidget:
@@ -61,8 +61,8 @@ class ControlPanel(QObject):
     def allows_apply_for_all(self) -> bool:
         raise NotImplementedError
 
-    def update_event(self, program: Program, data: dict[Any, Any]):
+    def update_event(self, program: BaseProgram, data: dict[Any, Any]):
         raise NotImplementedError
 
-    def update_values(self, program: Program):
+    def update_values(self, program: BaseProgram):
         raise NotImplementedError

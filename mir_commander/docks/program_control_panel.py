@@ -2,7 +2,7 @@ from PySide6.QtCore import QSignalBlocker, Qt
 from PySide6.QtWidgets import QCheckBox, QFrame, QScrollArea, QVBoxLayout
 
 from mir_commander.app_config import AppConfig, ControlPanelState
-from mir_commander.sdk.program import ControlPanel
+from mir_commander.sdk.base_program import BaseControlPanel
 from mir_commander.sdk.widgets import DockWidget
 
 
@@ -13,7 +13,7 @@ class ProgramControlPanelDock(DockWidget):
     A single instance of this class is used for showing widgets with settings for the program.
     """
 
-    def __init__(self, app_config: AppConfig, program_id: str, control_panel: ControlPanel, *args, **kwargs):
+    def __init__(self, app_config: AppConfig, program_id: str, control_panel: BaseControlPanel, *args, **kwargs):
         self._program_id = program_id
 
         super().__init__(*args, **kwargs)

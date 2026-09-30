@@ -7,7 +7,7 @@ from mir_commander.builtin_extensions.molecular_visualizer.control_elements.coor
 from mir_commander.builtin_extensions.molecular_visualizer.control_elements.image import Image
 from mir_commander.builtin_extensions.molecular_visualizer.control_elements.view import View
 from mir_commander.builtin_extensions.molecular_visualizer.control_elements.volume_cube import VolumeCube
-from mir_commander.builtin_extensions.sdk.base_control_panel import BaseControlBlock, BaseControlPanel
+from mir_commander.builtin_extensions.sdk.base_control_panel import BaseControlPanel, ControlBlock
 
 if TYPE_CHECKING:
     from mir_commander.builtin_extensions.molecular_visualizer.program import MolecularVisualizerProgram
@@ -18,18 +18,18 @@ class MolecularVisualizerControlPanel(BaseControlPanel):
         super().__init__()
 
         self._blocks = {
-            "view": BaseControlBlock(self.tr("View"), View(self), True),
-            "atom_labels": BaseControlBlock(self.tr("Atom labels"), AtomLabels(self), False),
-            "cubes_and_surfaces": BaseControlBlock(self.tr("Cubes and surfaces"), VolumeCube(self), False),
-            "image": BaseControlBlock(self.tr("Image"), Image(self), False),
-            "coordinate_axes": BaseControlBlock(self.tr("Coordinate axes"), CoordinateAxes(self), False),
-            "appearance": BaseControlBlock(self.tr("Appearance"), Appearance(self), False),
+            "view": ControlBlock(self.tr("View"), View(self), True),
+            "atom_labels": ControlBlock(self.tr("Atom labels"), AtomLabels(self), False),
+            "cubes_and_surfaces": ControlBlock(self.tr("Cubes and surfaces"), VolumeCube(self), False),
+            "image": ControlBlock(self.tr("Image"), Image(self), False),
+            "coordinate_axes": ControlBlock(self.tr("Coordinate axes"), CoordinateAxes(self), False),
+            "appearance": ControlBlock(self.tr("Appearance"), Appearance(self), False),
         }
 
     def allows_apply_for_all(self) -> bool:
         return True
 
-    def get_blocks(self) -> Iterable[BaseControlBlock]:
+    def get_blocks(self) -> Iterable[ControlBlock]:
         return self._blocks.values()
 
     def update_event(self, program: "MolecularVisualizerProgram", data: dict[Any, Any]):

@@ -10,7 +10,7 @@ from PySide6.QtWidgets import QApplication, QMdiArea, QMdiSubWindow, QMessageBox
 
 from mir_commander.docks.program_control_panel import ProgramControlPanelDock
 from mir_commander.errors import ProgramError
-from mir_commander.sdk.program import MessageChannel, NodeChangedAction
+from mir_commander.sdk.base_program import MessageChannel, NodeChangedAction
 from mir_commander.sdk.widgets import MdiSubWindowBody, MdiSubWindowTitleBar, ResizableContainer
 
 if TYPE_CHECKING:

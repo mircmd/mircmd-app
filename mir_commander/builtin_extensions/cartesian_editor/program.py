@@ -22,8 +22,7 @@ from mir_commander.builtin_extensions.utils.data_structures.atomic_coordinates i
     bytes_to_atomic_coordinates,
 )
 from mir_commander.extensions.manifest import Metadata
-from mir_commander.sdk.program import NodeChangedAction
-from mir_commander.sdk.program import Program as BaseProgram
+from mir_commander.sdk.base_program import BaseProgram, NodeChangedAction
 
 
 class TableItem(QStandardItem):

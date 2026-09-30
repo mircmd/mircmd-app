@@ -28,7 +28,7 @@ from mir_commander.sdk.program import (
 )
 from mir_commander.utils import sanitize_filename
 
-logger = logging.getLogger("Programs.MolecularVisualizer")
+logger = logging.getLogger(__name__)
 
 
 class MolecularVisualizerProgram(Program):
@@ -47,14 +47,16 @@ class MolecularVisualizerProgram(Program):
         self.visualizer = Visualizer(program=self, title=self.item.text(), config=self.config)
 
         self._molecule_index = 0
+
+        if self.item.get_type() == "mircmd:chemistry:volume_cube":
+            self._volume_cube_nodes.append(self.item)
+            self.visualizer.set_volume_cube(bytes_to_volume_cube(self.item.get_data()))
+
         self._draw_node = self.item
         self._set_draw_node()
         self.visualizer.set_atomic_coordinates(self._get_draw_node_atomic_coordinates())
         self.visualizer.coordinate_axes_adjust_length()
 
-        if self.item.get_type() == "mircmd:chemistry:volume_cube":
-            self._volume_cube_nodes.append(self.item)
-            self.visualizer.set_volume_cube(bytes_to_volume_cube(self.item.get_data()))
 
     def _check_opengl_version(self):
         """Check if OpenGL version is 3.3 or higher"""
@@ -119,12 +121,12 @@ class MolecularVisualizerProgram(Program):
 
         index = max(0, index)
         last_node = parent
-        if not parent.hasChildren() and parent.get_type() == "builtin.atomic_coordinates":
+        if not parent.hasChildren() and parent.get_type() == "mircmd:chemistry:atomic_coordinates":
             return True, 0, last_node
         else:
             for i in range(parent.rowCount()):
                 node = cast(QStandardItem, parent.child(i))
-                if node.get_type() == "builtin.atomic_coordinates":
+                if node.get_type() == "mircmd:chemistry:atomic_coordinates":
                     last_node = node
                     counter += 1
                     if index == counter:

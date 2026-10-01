@@ -1,8 +1,7 @@
 from mir_commander.builtin_extensions.molecular_visualizer.algebra import Vector3D
+from mir_commander.builtin_extensions.molecular_visualizer.config import AtomLabelConfig
 from mir_commander.builtin_extensions.molecular_visualizer.graphics.scene.text_node import TextNode
 from mir_commander.builtin_extensions.molecular_visualizer.graphics.utils import color_to_color4f
-
-from ...config import AtomLabelConfig
 
 
 class Label(TextNode):

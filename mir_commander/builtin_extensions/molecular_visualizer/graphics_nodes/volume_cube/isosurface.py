@@ -3,11 +3,12 @@ from typing import TYPE_CHECKING
 from mir_commander.builtin_extensions.molecular_visualizer.graphics.resource_manager import ResourceManager
 from mir_commander.builtin_extensions.molecular_visualizer.graphics.scene.node import NodeType
 from mir_commander.builtin_extensions.molecular_visualizer.graphics.utils import Color4f
-
-from ..base import BaseGraphicsNode
+from mir_commander.builtin_extensions.molecular_visualizer.graphics_nodes.base import BaseGraphicsNode
 
 if TYPE_CHECKING:
-    from .isosurface_group import IsosurfaceGroup
+    from mir_commander.builtin_extensions.molecular_visualizer.graphics_nodes.volume_cube.isosurface_group import (
+        IsosurfaceGroup,
+    )
 
 
 class Isosurface(BaseGraphicsNode):

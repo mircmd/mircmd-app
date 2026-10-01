@@ -8,8 +8,7 @@ from mir_commander.builtin_extensions.molecular_visualizer.graphics.opengl.verte
 from mir_commander.builtin_extensions.molecular_visualizer.graphics.resource_manager import ResourceManager
 from mir_commander.builtin_extensions.molecular_visualizer.graphics.scene.node import Node, NodeType
 from mir_commander.builtin_extensions.molecular_visualizer.graphics.utils import Color4f
-
-from .isosurface import Isosurface
+from mir_commander.builtin_extensions.molecular_visualizer.graphics_nodes.volume_cube.isosurface import Isosurface
 
 
 class IsosurfaceGroup(Node):

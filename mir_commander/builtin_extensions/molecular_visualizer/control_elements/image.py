@@ -13,20 +13,19 @@ from PySide6.QtWidgets import (
     QPushButton,
     QSpinBox,
     QVBoxLayout,
-    QWidget,
 )
 
+from mir_commander.builtin_extensions.molecular_visualizer.control_elements.utils import add_slider
 from mir_commander.builtin_extensions.molecular_visualizer.graphics.utils import color4f_to_qcolor, qcolor_to_color4f
+from mir_commander.builtin_extensions.molecular_visualizer.state import MolecularVisualizerState
+from mir_commander.builtin_extensions.sdk.base_control_panel import BlockWidget
 from mir_commander.sdk.widgets import ColorButton
 
-from .utils import add_slider
-
 if TYPE_CHECKING:
-    from ..control_panel import MolecularVisualizerControlPanel
-    from ..program import MolecularVisualizerProgram
+    from mir_commander.builtin_extensions.molecular_visualizer.control_panel import MolecularVisualizerControlPanel
 
 
-class Image(QWidget):
+class Image(BlockWidget[MolecularVisualizerState]):
     _file_name_sanitize_re = re.compile(r"[^\w _\-]|(\s)(?=\1+)")
 
     def __init__(self, control_panel: "MolecularVisualizerControlPanel"):
@@ -132,10 +131,10 @@ class Image(QWidget):
             },
         )
 
-    def update_values(self, program: "MolecularVisualizerProgram"):
-        self._width = int(program.visualizer.size().width() * program.visualizer.devicePixelRatio())
-        self._height = int(program.visualizer.size().height() * program.visualizer.devicePixelRatio())
+    def update_values(self, program_state: MolecularVisualizerState):
+        self._width = program_state.image_width
+        self._height = program_state.image_height
         if self._bg_color_inited is False:
             self._bg_color_inited = True
-            color = *program.visualizer.background_color[:3], 0.0
+            color = *program_state.background_color[:3], 0.0
             self._bg_color_button.set_color(color4f_to_qcolor(color))

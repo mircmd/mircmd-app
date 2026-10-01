@@ -1,5 +1,4 @@
 from collections.abc import Iterable
-from typing import TYPE_CHECKING, Any
 
 from mir_commander.builtin_extensions.molecular_visualizer.control_elements.appearance import Appearance
 from mir_commander.builtin_extensions.molecular_visualizer.control_elements.atom_labels import AtomLabels
@@ -7,10 +6,8 @@ from mir_commander.builtin_extensions.molecular_visualizer.control_elements.coor
 from mir_commander.builtin_extensions.molecular_visualizer.control_elements.image import Image
 from mir_commander.builtin_extensions.molecular_visualizer.control_elements.view import View
 from mir_commander.builtin_extensions.molecular_visualizer.control_elements.volume_cube import VolumeCube
+from mir_commander.builtin_extensions.molecular_visualizer.state import MolecularVisualizerState
 from mir_commander.builtin_extensions.sdk.base_control_panel import BaseControlPanel, ControlBlock
-
-if TYPE_CHECKING:
-    from mir_commander.builtin_extensions.molecular_visualizer.program import MolecularVisualizerProgram
 
 
 class MolecularVisualizerControlPanel(BaseControlPanel):
@@ -32,12 +29,8 @@ class MolecularVisualizerControlPanel(BaseControlPanel):
     def get_blocks(self) -> Iterable[ControlBlock]:
         return self._blocks.values()
 
-    def update_event(self, program: "MolecularVisualizerProgram", data: dict[Any, Any]):
-        if "update_blocks" in data:
-            for name in data["update_blocks"]:
-                if name in self._blocks:
-                    item = self._blocks[name]
-                    item.widget.update_values(program)
-        else:
-            for item in self._blocks.values():
-                item.widget.update_values(program)
+    def update_event(self, program_state: bytes):
+        state = MolecularVisualizerState.deserialize(program_state)
+
+        for block in self._blocks.values():
+            block.widget.update_values(state)

@@ -1,7 +1,7 @@
 from typing import Generic, Hashable, TypeVar
 
-from .errors import NodeNotFoundError
-from .node import Node
+from mir_commander.builtin_extensions.molecular_visualizer.graphics.scene.errors import NodeNotFoundError
+from mir_commander.builtin_extensions.molecular_visualizer.graphics.scene.node import Node
 
 T = TypeVar("T", bound=Node)
 

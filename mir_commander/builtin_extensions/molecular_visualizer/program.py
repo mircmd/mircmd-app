@@ -8,6 +8,11 @@ from PySide6.QtWidgets import QWidget
 
 from mir_commander.builtin_extensions.molecular_visualizer.config import Config
 from mir_commander.builtin_extensions.molecular_visualizer.graphics.utils import Color4f
+from mir_commander.builtin_extensions.molecular_visualizer.state import (
+    CoordinateAxesState,
+    CoordinateAxisState,
+    MolecularVisualizerState,
+)
 from mir_commander.builtin_extensions.molecular_visualizer.utils import save_image
 from mir_commander.builtin_extensions.molecular_visualizer.visualizer import Visualizer
 from mir_commander.builtin_extensions.utils.data_structures.atomic_coordinates import (
@@ -56,6 +61,42 @@ class MolecularVisualizerProgram(BaseProgram):
         self._set_draw_node()
         self.visualizer.set_atomic_coordinates(self._get_draw_node_atomic_coordinates())
         self.visualizer.coordinate_axes_adjust_length()
+
+    def get_state(self) -> bytes:
+        atom_label = self.config.atom_label
+        return MolecularVisualizerState(
+            scene_rotation=self.visualizer.scene_rotation,
+            scene_scale=self.visualizer.get_scene_scale(),
+            atom_label_size=atom_label.size,
+            atom_label_offset=atom_label.offset,
+            atom_label_symbol_visible=atom_label.symbol_visible,
+            atom_label_number_visible=atom_label.number_visible,
+            coordinate_axes=self._get_coordinate_axes_state(),
+            background_color=self.visualizer.background_color,
+            styles=[style.name for style in self.config.styles],
+            current_style=self.visualizer.current_style.name,
+            image_width=int(self.visualizer.width() * self.visualizer.devicePixelRatio()),
+            image_height=int(self.visualizer.height() * self.visualizer.devicePixelRatio()),
+            isosurface_groups=self.visualizer.get_volume_cube_isosurface_groups(),
+            empty_volume_cube_scalar_field=self.visualizer.is_empty_volume_cube_scalar_field(),
+        ).serialize()
+
+    def _get_coordinate_axes_state(self) -> CoordinateAxesState:
+        axes = self.visualizer.coordinate_axes
+        axis_states = {
+            name: CoordinateAxisState(axis.axis_color, axis.label_color, axis.label_text)
+            for name, axis in (("x", axes.x), ("y", axes.y), ("z", axes.z))
+        }
+        return CoordinateAxesState(
+            visible=axes.visible,
+            labels_visible=axes.labels_visible,
+            both_directions=axes.both_directions,
+            at_000=axes.at_000,
+            length=axes.length,
+            thickness=axes.thickness,
+            labels_size=axes.labels_size,
+            **axis_states,
+        )
 
     def _check_opengl_version(self):
         """Check if OpenGL version is 3.3 or higher"""

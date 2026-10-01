@@ -2,9 +2,8 @@ from typing import Literal
 
 from mir_commander.builtin_extensions.molecular_visualizer.algebra import Vector3D
 from mir_commander.builtin_extensions.molecular_visualizer.graphics.font_atlas import FontAtlas
+from mir_commander.builtin_extensions.molecular_visualizer.graphics.scene.node import Node, NodeType
 from mir_commander.builtin_extensions.molecular_visualizer.graphics.utils import Color4f
-
-from .node import Node, NodeType
 
 
 class TextNode(Node):

@@ -1,14 +1,16 @@
 from typing import TYPE_CHECKING
 
 from PySide6.QtCore import QSignalBlocker
-from PySide6.QtWidgets import QGridLayout, QLabel, QSpinBox, QWidget
+from PySide6.QtWidgets import QGridLayout, QLabel, QSpinBox
+
+from mir_commander.builtin_extensions.sdk.base_control_panel import BlockWidget
+from mir_commander.builtin_extensions.cartesian_editor.state import CartesianEditorState
 
 if TYPE_CHECKING:
     from mir_commander.builtin_extensions.cartesian_editor.control_panel import CartesianEditorControlPanel
-    from mir_commander.builtin_extensions.cartesian_editor.program import CartesianEditorProgram
 
 
-class General(QWidget):
+class General(BlockWidget[CartesianEditorState]):
     def __init__(self, control_panel: "CartesianEditorControlPanel"):
         super().__init__()
 
@@ -26,6 +28,6 @@ class General(QWidget):
 
         self.setLayout(layout)
 
-    def update_values(self, program: "CartesianEditorProgram"):
+    def update_values(self, program_state: CartesianEditorState):
         with QSignalBlocker(self._decimals_spinbox):
-            self._decimals_spinbox.setValue(program.decimals)
+            self._decimals_spinbox.setValue(program_state.decimals)

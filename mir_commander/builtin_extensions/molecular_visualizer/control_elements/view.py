@@ -2,16 +2,17 @@ import contextlib
 from typing import TYPE_CHECKING
 
 from PySide6.QtCore import QSignalBlocker
-from PySide6.QtWidgets import QDoubleSpinBox, QGridLayout, QPushButton, QSlider, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QDoubleSpinBox, QGridLayout, QPushButton, QSlider, QVBoxLayout
 
-from .utils import add_slider
+from mir_commander.builtin_extensions.molecular_visualizer.control_elements.utils import add_slider
+from mir_commander.builtin_extensions.molecular_visualizer.state import MolecularVisualizerState
+from mir_commander.builtin_extensions.sdk.base_control_panel import BlockWidget
 
 if TYPE_CHECKING:
-    from ..control_panel import MolecularVisualizerControlPanel
-    from ..program import MolecularVisualizerProgram
+    from mir_commander.builtin_extensions.molecular_visualizer.control_panel import MolecularVisualizerControlPanel
 
 
-class View(QWidget):
+class View(BlockWidget[MolecularVisualizerState]):
     def __init__(self, control_panel: "MolecularVisualizerControlPanel"):
         super().__init__()
 
@@ -132,8 +133,8 @@ class View(QWidget):
         self._control_panel.program_action_signal.emit("view.set_scene_rotation", {"pitch": 0, "yaw": 0, "roll": 0})
         self._control_panel.program_action_signal.emit("view.set_scene_scale", {"factor": 1.0})
 
-    def update_values(self, program: "MolecularVisualizerProgram"):
-        values = {axis: value for axis, value in zip(self._axis_order, program.visualizer.scene_rotation)}
+    def update_values(self, program_state: MolecularVisualizerState):
+        values = {axis: value for axis, value in zip(self._axis_order, program_state.scene_rotation)}
 
         with contextlib.ExitStack() as stack:
             for axis in self._axis_order:
@@ -147,6 +148,6 @@ class View(QWidget):
                 self._rotation_slider[axis].setValue(int(value * 10))
                 self._rotation_double_spinbox[axis].setValue(value)
 
-            self._scale_prev_value = scale = program.visualizer.get_scene_scale()
+            self._scale_prev_value = scale = program_state.scene_scale
             self._scale_slider.setValue(int(scale * 100))
             self._scale_double_spinbox.setValue(scale)

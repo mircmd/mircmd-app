@@ -17,7 +17,7 @@ class MessageChannel(Enum):
 class BaseProgram(QObject):
     send_message_signal = Signal(MessageChannel, str)
     node_changed_signal = Signal(int, NodeChangedAction)
-    update_control_panel_signal = Signal(dict)
+    update_control_panel_signal = Signal()
     update_window_title_signal = Signal(str)
 
     def __init__(self, item: QStandardItem):
@@ -39,16 +39,19 @@ class BaseProgram(QObject):
     def get_config(self) -> bytes:
         raise NotImplementedError
 
-    def set_config(self, data: bytes):
+    def set_config(self, data: bytes) -> None:
         raise NotImplementedError
 
     def get_widget(self) -> QWidget:
         raise NotImplementedError
 
-    def node_changed_event(self, node_id: int, action: NodeChangedAction):
+    def get_state(self) -> bytes:
         raise NotImplementedError
 
-    def action_event(self, action: str, data: dict[str, Any], instance_index: int):
+    def node_changed_event(self, node_id: int, action: NodeChangedAction) -> None:
+        raise NotImplementedError
+
+    def action_event(self, action: str, data: dict[str, Any], instance_index: int) -> None:
         raise NotImplementedError
 
 
@@ -61,8 +64,5 @@ class BaseControlPanel(QObject):
     def allows_apply_for_all(self) -> bool:
         raise NotImplementedError
 
-    def update_event(self, program: BaseProgram, data: dict[Any, Any]):
-        raise NotImplementedError
-
-    def update_values(self, program: BaseProgram):
+    def update_event(self, program_state: bytes) -> None:
         raise NotImplementedError

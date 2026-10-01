@@ -1,9 +1,8 @@
 from mir_commander.builtin_extensions.molecular_visualizer.algebra import Vector3D
+from mir_commander.builtin_extensions.molecular_visualizer.config import SelectedAtom
+from mir_commander.builtin_extensions.molecular_visualizer.consts import VAO_CUBE_RESOURCE_NAME
 from mir_commander.builtin_extensions.molecular_visualizer.graphics.scene.node import Node, NodeType
 from mir_commander.builtin_extensions.molecular_visualizer.graphics.utils import Color4f, color_to_color4f
-
-from ...config import SelectedAtom
-from ...consts import VAO_CUBE_RESOURCE_NAME
 
 
 class BoundingSphere(Node):

@@ -3,8 +3,7 @@ from PySide6.QtGui import QFont
 from PySide6.QtWidgets import QLabel, QVBoxLayout, QWidget
 
 from mir_commander.builtin_extensions.molecular_visualizer.graphics.utils import color_to_qcolor
-
-from .config import TextOverlayConfig
+from mir_commander.builtin_extensions.molecular_visualizer.opengl.config import TextOverlayConfig
 
 
 class TextOverlay(QWidget):

@@ -2,13 +2,16 @@ from enum import Enum
 from typing import TYPE_CHECKING, Any, Hashable, Optional, Self
 
 from mir_commander.builtin_extensions.molecular_visualizer.algebra import Matrix4x4, Quaternion, Vector3D
+from mir_commander.builtin_extensions.molecular_visualizer.graphics.scene.errors import (
+    NodeError,
+    NodeNotFoundError,
+    NodeParentError,
+)
 from mir_commander.builtin_extensions.molecular_visualizer.graphics.transform import Transform
 from mir_commander.builtin_extensions.molecular_visualizer.graphics.utils import Color4f, id_to_color
 
-from .errors import NodeError, NodeNotFoundError, NodeParentError
-
 if TYPE_CHECKING:
-    from .root_node import RootNode
+    from mir_commander.builtin_extensions.molecular_visualizer.graphics.scene.root_node import RootNode
 
 _ID_COUNTER_LIMIT = 255 * 255 * 255
 

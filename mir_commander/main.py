@@ -12,7 +12,7 @@ from mir_commander.extensions.errors import ExtensionsManagerError
 from mir_commander.extensions.extensions_manager import ExtensionsManager
 
 PLATFORM = platform.system().lower()
-logger = logging.getLogger("Main")
+logger = logging.getLogger(__name__)
 
 
 def _setup_app_directories():

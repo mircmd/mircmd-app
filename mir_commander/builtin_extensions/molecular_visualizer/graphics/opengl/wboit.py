@@ -56,11 +56,14 @@ from OpenGL.GL import (
 )
 
 from mir_commander.builtin_extensions.molecular_visualizer.graphics.mesh import rect
-
-from .framebuffer import Framebuffer
-from .shader import FragmentShader, ShaderProgram, VertexShader
-from .texture2d import Texture2D
-from .vertex_array_object import VertexArrayObject
+from mir_commander.builtin_extensions.molecular_visualizer.graphics.opengl.framebuffer import Framebuffer
+from mir_commander.builtin_extensions.molecular_visualizer.graphics.opengl.shader import (
+    FragmentShader,
+    ShaderProgram,
+    VertexShader,
+)
+from mir_commander.builtin_extensions.molecular_visualizer.graphics.opengl.texture2d import Texture2D
+from mir_commander.builtin_extensions.molecular_visualizer.graphics.opengl.vertex_array_object import VertexArrayObject
 
 VERTEX_SHADER = """
 #version 330 core

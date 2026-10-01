@@ -2,10 +2,9 @@ from mir_commander.builtin_extensions.molecular_visualizer.algebra import Vector
 from mir_commander.builtin_extensions.molecular_visualizer.graphics.scene.node import Node, NodeType
 from mir_commander.builtin_extensions.molecular_visualizer.graphics.scene.text_node import TextNode
 from mir_commander.builtin_extensions.molecular_visualizer.graphics.utils import Color4f
-
-from .cone import Cone
-from .cylinder import Cylinder
-from .sphere import Sphere
+from mir_commander.builtin_extensions.molecular_visualizer.graphics_nodes.cone import Cone
+from mir_commander.builtin_extensions.molecular_visualizer.graphics_nodes.cylinder import Cylinder
+from mir_commander.builtin_extensions.molecular_visualizer.graphics_nodes.sphere import Sphere
 
 
 class AxisLabel(TextNode):

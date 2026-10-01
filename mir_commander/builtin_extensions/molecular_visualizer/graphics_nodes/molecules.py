@@ -1,11 +1,10 @@
 from math import fabs
 
 from mir_commander.builtin_extensions.molecular_visualizer.algebra import Vector3D
+from mir_commander.builtin_extensions.molecular_visualizer.config import Style
+from mir_commander.builtin_extensions.molecular_visualizer.errors import CalcError
 from mir_commander.builtin_extensions.molecular_visualizer.graphics.scene.node import Node, NodeType
-
-from ..config import Style
-from ..errors import CalcError
-from .molecule import Molecule
+from mir_commander.builtin_extensions.molecular_visualizer.graphics_nodes.molecule import Molecule
 
 
 class Molecules(Node):

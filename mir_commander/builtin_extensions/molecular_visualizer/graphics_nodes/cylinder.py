@@ -1,7 +1,6 @@
 from mir_commander.builtin_extensions.molecular_visualizer.algebra import Quaternion, Vector3D
-
-from ..consts import VAO_CUBE_RESOURCE_NAME
-from .base import BaseGraphicsNode
+from mir_commander.builtin_extensions.molecular_visualizer.consts import VAO_CUBE_RESOURCE_NAME
+from mir_commander.builtin_extensions.molecular_visualizer.graphics_nodes.base import BaseGraphicsNode
 
 
 class Cylinder(BaseGraphicsNode):

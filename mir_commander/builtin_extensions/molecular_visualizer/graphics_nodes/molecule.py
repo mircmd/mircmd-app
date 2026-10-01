@@ -7,23 +7,27 @@ import numpy as np
 from pydantic_extra_types.color import Color
 
 from mir_commander.builtin_extensions.molecular_visualizer.algebra import Vector3D
+from mir_commander.builtin_extensions.molecular_visualizer.config import AtomLabelConfig, Style
+from mir_commander.builtin_extensions.molecular_visualizer.errors import CalcError
 from mir_commander.builtin_extensions.molecular_visualizer.graphics.scene.node import Node, NodeType
 from mir_commander.builtin_extensions.molecular_visualizer.graphics.utils import Color4f, normalize_color
+from mir_commander.builtin_extensions.molecular_visualizer.graphics_nodes.atom.atom import Atom
+from mir_commander.builtin_extensions.molecular_visualizer.graphics_nodes.bond import Bond
 from mir_commander.builtin_extensions.molecular_visualizer.mathematics import (
     geom_angle_xyz,
     geom_oop_angle_xyz,
     geom_torsion_angle_xyz,
 )
+from mir_commander.builtin_extensions.molecular_visualizer.utils import (
+    InteratomicAngle,
+    InteratomicDistance,
+    InteratomicOutOfPlane,
+    InteratomicTorsion,
+)
 from mir_commander.builtin_extensions.utils.chemistry import atom_single_bond_covalent_radius_list, build_bonds
 from mir_commander.builtin_extensions.utils.data_structures.atomic_coordinates import AtomicCoordinates
 
-from ..config import AtomLabelConfig, Style
-from ..errors import CalcError
-from ..utils import InteratomicAngle, InteratomicDistance, InteratomicOutOfPlane, InteratomicTorsion
-from .atom.atom import Atom
-from .bond import Bond
-
-logger = logging.getLogger("Programs.MolecularVisualizer")
+logger = logging.getLogger(__name__)
 
 
 class Molecule(Node):

@@ -1,8 +1,7 @@
+from mir_commander.builtin_extensions.molecular_visualizer.graphics.scene.node import Node, NodeType
+from mir_commander.builtin_extensions.molecular_visualizer.graphics.scene.rendering_container import RenderingContainer
+from mir_commander.builtin_extensions.molecular_visualizer.graphics.scene.root_node import RootNode
 from mir_commander.builtin_extensions.molecular_visualizer.graphics.transform import Transform
-
-from .node import Node, NodeType
-from .rendering_container import RenderingContainer
-from .root_node import RootNode
 
 
 class Scene:

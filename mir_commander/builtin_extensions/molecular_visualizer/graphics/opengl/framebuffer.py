@@ -10,7 +10,7 @@ from OpenGL.GL import (
     glGenFramebuffers,
 )
 
-from .errors import FramebufferError
+from mir_commander.builtin_extensions.molecular_visualizer.graphics.opengl.errors import FramebufferError
 
 
 class Framebuffer:

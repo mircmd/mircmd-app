@@ -1,8 +1,8 @@
 from typing import cast
 
-from .node import Node, NodeType
-from .rendering_container import RenderingContainer
-from .text_node import TextNode
+from mir_commander.builtin_extensions.molecular_visualizer.graphics.scene.node import Node, NodeType
+from mir_commander.builtin_extensions.molecular_visualizer.graphics.scene.rendering_container import RenderingContainer
+from mir_commander.builtin_extensions.molecular_visualizer.graphics.scene.text_node import TextNode
 
 
 class RootNode:

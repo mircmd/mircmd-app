@@ -32,7 +32,7 @@ from mir_commander.extensions.file_exporter import (
 from mir_commander.item import Item
 from mir_commander.utils import sanitize_filename
 
-logger = logging.getLogger("UI.ExportFileDialog")
+logger = logging.getLogger(__name__)
 
 
 class ExportFileDialog(QDialog):

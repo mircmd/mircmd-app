@@ -14,10 +14,10 @@ from mir_commander.sdk.base_program import MessageChannel, NodeChangedAction
 from mir_commander.sdk.widgets import MdiSubWindowBody, MdiSubWindowTitleBar, ResizableContainer
 
 if TYPE_CHECKING:
-    from .project_window import ProjectWindow
+    from mir_commander.project_window import ProjectWindow
 
 
-logger = logging.getLogger("UI.MdiArea")
+logger = logging.getLogger(__name__)
 
 
 class _MdiProgramWindow(QMdiSubWindow):
@@ -101,7 +101,7 @@ class _MdiProgramWindow(QMdiSubWindow):
         self._custom_title_bar.update_state(new_state)
 
         if self.program_control_panel_dock is not None and new_state == Qt.WindowState.WindowActive:
-            self.program_control_panel_dock.control_panel.update_event(self.program, {})
+            self.program_control_panel_dock.control_panel.update_event(self.program.get_state())
 
     @property
     def id(self) -> int:
@@ -177,11 +177,11 @@ class MdiArea(QMdiArea):
             if window.id != window_id:
                 window.program.node_changed_event(node_id, action)
 
-    def _update_control_panel_handler(self, window: _MdiProgramWindow, data: dict[Any, Any]):
+    def _update_control_panel_handler(self, window: _MdiProgramWindow):
         w = self.currentSubWindow()
         # TODO: why do we need to check if w is not None and w.id == window.id?
         if window.program_control_panel_dock is not None and w is not None and w.id == window.id:
-            window.program_control_panel_dock.control_panel.update_event(window.program, data)
+            window.program_control_panel_dock.control_panel.update_event(window.program.get_state())
 
     def _update_window_title_handler(self, title: str):
         w = self.currentSubWindow()
@@ -215,9 +215,7 @@ class MdiArea(QMdiArea):
                 lambda node_id, action: self._node_changed_handler(node_id, window.id, action)
             )
             window.program.send_message_signal.connect(self.program_send_message_signal.emit)
-            window.program.update_control_panel_signal.connect(
-                lambda data: self._update_control_panel_handler(window, data)
-            )
+            window.program.update_control_panel_signal.connect(lambda: self._update_control_panel_handler(window))
             window.program.update_window_title_signal.connect(self._update_window_title_handler)
             window.show()
         except ProgramError as e:

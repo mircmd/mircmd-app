@@ -1,20 +1,21 @@
+from contextlib import ExitStack
 from typing import TYPE_CHECKING
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import QSignalBlocker, Qt
 from PySide6.QtGui import QColor
 from PySide6.QtWidgets import QCheckBox, QGridLayout, QLabel, QLineEdit, QPushButton, QVBoxLayout, QWidget
 
+from mir_commander.builtin_extensions.molecular_visualizer.control_elements.utils import add_slider
 from mir_commander.builtin_extensions.molecular_visualizer.graphics.utils import color4f_to_qcolor, qcolor_to_color4f
+from mir_commander.builtin_extensions.molecular_visualizer.state import MolecularVisualizerState
+from mir_commander.builtin_extensions.sdk.base_control_panel import BlockWidget
 from mir_commander.sdk.widgets import ColorButton
 
-from .utils import add_slider
-
 if TYPE_CHECKING:
-    from ..control_panel import MolecularVisualizerControlPanel
-    from ..program import MolecularVisualizerProgram
+    from mir_commander.builtin_extensions.molecular_visualizer.control_panel import MolecularVisualizerControlPanel
 
 
-class CoordinateAxes(QWidget):
+class CoordinateAxes(BlockWidget[MolecularVisualizerState]):
     def __init__(self, control_panel: "MolecularVisualizerControlPanel"):
         super().__init__()
 
@@ -197,33 +198,37 @@ class CoordinateAxes(QWidget):
 
         self._visibility_checkbox.setEnabled(True)
 
-    def update_values(self, program: "MolecularVisualizerProgram"):
-        coordinate_axes = program.visualizer.coordinate_axes
+    def update_values(self, program_state: MolecularVisualizerState):
+        with ExitStack() as stack:
+            for widget in self.findChildren(QWidget):
+                stack.enter_context(QSignalBlocker(widget))
 
-        self._visibility_checkbox.setChecked(coordinate_axes.visible)
-        self._labels_visibility_checkbox.setChecked(coordinate_axes.labels_visible)
-        self._both_directions_checkbox.setChecked(coordinate_axes.both_directions)
-        self._center_checkbox.setChecked(not coordinate_axes.at_000)
+            coordinate_axes = program_state.coordinate_axes
 
-        self._length_slider.setValue(int(coordinate_axes.length * 100))
-        self._length_double_spinbox.setValue(coordinate_axes.length)
+            self._visibility_checkbox.setChecked(coordinate_axes.visible)
+            self._labels_visibility_checkbox.setChecked(coordinate_axes.labels_visible)
+            self._both_directions_checkbox.setChecked(coordinate_axes.both_directions)
+            self._center_checkbox.setChecked(not coordinate_axes.at_000)
 
-        self._thickness_slider.setValue(int(coordinate_axes.thickness * 100))
-        self._thickness_double_spinbox.setValue(coordinate_axes.thickness)
+            self._length_slider.setValue(int(coordinate_axes.length * 100))
+            self._length_double_spinbox.setValue(coordinate_axes.length)
 
-        self._font_size_slider.setValue(coordinate_axes.labels_size)
-        self._font_size_double_spinbox.setValue(coordinate_axes.labels_size)
+            self._thickness_slider.setValue(int(coordinate_axes.thickness * 100))
+            self._thickness_double_spinbox.setValue(coordinate_axes.thickness)
 
-        self._x_axis_color_button.set_color(color4f_to_qcolor(coordinate_axes.x.axis_color))
-        self._y_axis_color_button.set_color(color4f_to_qcolor(coordinate_axes.y.axis_color))
-        self._z_axis_color_button.set_color(color4f_to_qcolor(coordinate_axes.z.axis_color))
+            self._font_size_slider.setValue(coordinate_axes.labels_size)
+            self._font_size_double_spinbox.setValue(coordinate_axes.labels_size)
 
-        self._x_label_color_button.set_color(color4f_to_qcolor(coordinate_axes.x.label_color))
-        self._y_label_color_button.set_color(color4f_to_qcolor(coordinate_axes.y.label_color))
-        self._z_label_color_button.set_color(color4f_to_qcolor(coordinate_axes.z.label_color))
+            self._x_axis_color_button.set_color(color4f_to_qcolor(coordinate_axes.x.axis_color))
+            self._y_axis_color_button.set_color(color4f_to_qcolor(coordinate_axes.y.axis_color))
+            self._z_axis_color_button.set_color(color4f_to_qcolor(coordinate_axes.z.axis_color))
 
-        self._x_line_edit.setText(coordinate_axes.x.label_text)
-        self._y_line_edit.setText(coordinate_axes.y.label_text)
-        self._z_line_edit.setText(coordinate_axes.z.label_text)
+            self._x_label_color_button.set_color(color4f_to_qcolor(coordinate_axes.x.label_color))
+            self._y_label_color_button.set_color(color4f_to_qcolor(coordinate_axes.y.label_color))
+            self._z_label_color_button.set_color(color4f_to_qcolor(coordinate_axes.z.label_color))
 
-        self._enable_controls(coordinate_axes.visible)
+            self._x_line_edit.setText(coordinate_axes.x.label_text)
+            self._y_line_edit.setText(coordinate_axes.y.label_text)
+            self._z_line_edit.setText(coordinate_axes.z.label_text)
+
+            self._enable_controls(coordinate_axes.visible)

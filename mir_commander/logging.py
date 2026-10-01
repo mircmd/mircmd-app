@@ -34,7 +34,6 @@ def setup():
             "root": {"level": "INFO" if FROZEN else "DEBUG", "handlers": ["console", "file"]},
         }
     )
-    logging.getLogger("cclib").setLevel(logging.CRITICAL)
     logging.getLogger("OpenGL").setLevel(logging.WARNING)
     if FROZEN:
         logging.getLogger("httpx").setLevel(logging.WARNING)

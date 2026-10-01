@@ -1,13 +1,17 @@
 from mir_commander.builtin_extensions.molecular_visualizer.algebra import Vector3D
-from mir_commander.core.chemistry import BOHR2ANGSTROM
+from mir_commander.builtin_extensions.molecular_visualizer.entities import (
+    VolumeCubeIsosurface,
+    VolumeCubeIsosurfaceGroup,
+)
+from mir_commander.builtin_extensions.molecular_visualizer.errors import EmptyScalarFieldError
 from mir_commander.builtin_extensions.molecular_visualizer.graphics.resource_manager import ResourceManager
 from mir_commander.builtin_extensions.molecular_visualizer.graphics.scene.node import Node, NodeType
 from mir_commander.builtin_extensions.molecular_visualizer.graphics.utils import Color4f
+from mir_commander.builtin_extensions.molecular_visualizer.graphics_nodes.volume_cube.isosurface_group import (
+    IsosurfaceGroup,
+)
 from mir_commander.builtin_extensions.utils.data_structures.volume_cube import VolumeCube as VolumeCubeDataStructure
-
-from ...entities import VolumeCubeIsosurface, VolumeCubeIsosurfaceGroup
-from ...errors import EmptyScalarFieldError
-from .isosurface_group import IsosurfaceGroup
+from mir_commander.core.chemistry import BOHR2ANGSTROM
 
 
 class VolumeCube(Node):

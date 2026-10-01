@@ -1,9 +1,9 @@
-from .camera import Camera
-from .font_atlas import FontAtlas
-from .opengl.shader import ShaderProgram
-from .opengl.texture2d import Texture2D
-from .opengl.vertex_array_object import VertexArrayObject
-from .scene.scene import Scene
+from mir_commander.builtin_extensions.molecular_visualizer.graphics.camera import Camera
+from mir_commander.builtin_extensions.molecular_visualizer.graphics.font_atlas import FontAtlas
+from mir_commander.builtin_extensions.molecular_visualizer.graphics.opengl.shader import ShaderProgram
+from mir_commander.builtin_extensions.molecular_visualizer.graphics.opengl.texture2d import Texture2D
+from mir_commander.builtin_extensions.molecular_visualizer.graphics.opengl.vertex_array_object import VertexArrayObject
+from mir_commander.builtin_extensions.molecular_visualizer.graphics.scene.scene import Scene
 
 
 class ResourceManager:

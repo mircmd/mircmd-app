@@ -1,9 +1,8 @@
 from mir_commander.builtin_extensions.molecular_visualizer.algebra import Vector3D
 from mir_commander.builtin_extensions.molecular_visualizer.graphics.scene.node import Node, NodeType
 from mir_commander.builtin_extensions.molecular_visualizer.graphics.utils import Color4f
-
-from .atom.atom import Atom
-from .cylinder import Cylinder
+from mir_commander.builtin_extensions.molecular_visualizer.graphics_nodes.atom.atom import Atom
+from mir_commander.builtin_extensions.molecular_visualizer.graphics_nodes.cylinder import Cylinder
 
 
 class Bond(Node):

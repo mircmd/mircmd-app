@@ -14,7 +14,7 @@ from OpenGL.GL.shaders import (
     compileShader,
 )
 
-from .errors import OpenGLError
+from mir_commander.builtin_extensions.molecular_visualizer.graphics.opengl.errors import OpenGLError
 
 
 class UniformLocations:

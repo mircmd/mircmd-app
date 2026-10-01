@@ -10,17 +10,16 @@ from PySide6.QtWidgets import (
     QPushButton,
     QTreeView,
     QVBoxLayout,
-    QWidget,
 )
 
+from mir_commander.builtin_extensions.molecular_visualizer.entities import VolumeCubeIsosurfaceGroup
 from mir_commander.builtin_extensions.molecular_visualizer.graphics.utils import color4f_to_qcolor, qcolor_to_color4f
+from mir_commander.builtin_extensions.molecular_visualizer.state import MolecularVisualizerState
+from mir_commander.builtin_extensions.sdk.base_control_panel import BlockWidget
 from mir_commander.sdk.widgets import ColorButton
 
-from ..entities import VolumeCubeIsosurfaceGroup
-
 if TYPE_CHECKING:
-    from ..control_panel import MolecularVisualizerControlPanel
-    from ..program import MolecularVisualizerProgram
+    from mir_commander.builtin_extensions.molecular_visualizer.control_panel import MolecularVisualizerControlPanel
 
 
 class VisibilityButton(QPushButton):
@@ -147,11 +146,12 @@ class IsosurfacesTreeView(QTreeView):
         super().resizeEvent(event)
 
 
-class VolumeCube(QWidget):
+class VolumeCube(BlockWidget[MolecularVisualizerState]):
     def __init__(self, control_panel: "MolecularVisualizerControlPanel"):
         super().__init__()
 
         self._control_panel = control_panel
+        self._isosurface_groups: list[VolumeCubeIsosurfaceGroup] | None = None
 
         self._value = QDoubleSpinBox()
         self._value.setRange(-1000.0, 1000.0)
@@ -186,9 +186,11 @@ class VolumeCube(QWidget):
         self.main_layout.addLayout(value_layout)
         self.setLayout(self.main_layout)
 
-    def update_values(self, program: "MolecularVisualizerProgram"):
-        self._isosurfaces_tree_view.load(program.visualizer.get_volume_cube_isosurface_groups())
-        self.setDisabled(program.visualizer.is_empty_volume_cube_scalar_field())
+    def update_values(self, program_state: MolecularVisualizerState):
+        if self._isosurface_groups != program_state.isosurface_groups:
+            self._isosurfaces_tree_view.load(program_state.isosurface_groups)
+            self._isosurface_groups = program_state.isosurface_groups
+        self.setDisabled(program_state.empty_volume_cube_scalar_field)
 
     def add_button_clicked_handler(self):
         self._control_panel.program_action_signal.emit(

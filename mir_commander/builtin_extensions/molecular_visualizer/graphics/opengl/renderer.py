@@ -55,6 +55,14 @@ from OpenGL.GL import (
     glViewport,
 )
 
+from mir_commander.builtin_extensions.molecular_visualizer.graphics.opengl.errors import RendererError
+from mir_commander.builtin_extensions.molecular_visualizer.graphics.opengl.shader import (
+    FragmentShader,
+    ShaderProgram,
+    UniformLocations,
+    VertexShader,
+)
+from mir_commander.builtin_extensions.molecular_visualizer.graphics.opengl.wboit import WBOIT
 from mir_commander.builtin_extensions.molecular_visualizer.graphics.projection import ProjectionManager, ProjectionMode
 from mir_commander.builtin_extensions.molecular_visualizer.graphics.resource_manager import ResourceManager
 from mir_commander.builtin_extensions.molecular_visualizer.graphics.scene.node import Node, NodeType
@@ -62,11 +70,7 @@ from mir_commander.builtin_extensions.molecular_visualizer.graphics.scene.render
 from mir_commander.builtin_extensions.molecular_visualizer.graphics.scene.text_node import TextNode
 from mir_commander.builtin_extensions.molecular_visualizer.graphics.utils import Color4f, crop_image_to_content
 
-from .errors import RendererError
-from .shader import FragmentShader, ShaderProgram, UniformLocations, VertexShader
-from .wboit import WBOIT
-
-logger = logging.getLogger("Core.Graphics.Renderer")
+logger = logging.getLogger(__name__)
 
 
 _COMMON_SHADER_CONSTS = """

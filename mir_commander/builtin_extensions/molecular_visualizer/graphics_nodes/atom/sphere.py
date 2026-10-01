@@ -1,13 +1,12 @@
 from typing import TYPE_CHECKING
 
 from mir_commander.builtin_extensions.molecular_visualizer.algebra import Vector3D
+from mir_commander.builtin_extensions.molecular_visualizer.consts import VAO_CUBE_RESOURCE_NAME
 from mir_commander.builtin_extensions.molecular_visualizer.graphics.scene.node import NodeType
-
-from ...consts import VAO_CUBE_RESOURCE_NAME
-from ..base import BaseGraphicsNode
+from mir_commander.builtin_extensions.molecular_visualizer.graphics_nodes.base import BaseGraphicsNode
 
 if TYPE_CHECKING:
-    from .atom import Atom
+    from mir_commander.builtin_extensions.molecular_visualizer.graphics_nodes.atom.atom import Atom
 
 
 class Sphere(BaseGraphicsNode):

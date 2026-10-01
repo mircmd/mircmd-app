@@ -2,17 +2,16 @@ from time import monotonic
 from typing import TYPE_CHECKING
 
 from mir_commander.builtin_extensions.molecular_visualizer.algebra import Vector3D
-from mir_commander.builtin_extensions.utils.chemistry import atomic_number_to_symbol
+from mir_commander.builtin_extensions.molecular_visualizer.config import AtomLabelConfig, SelectedAtom
 from mir_commander.builtin_extensions.molecular_visualizer.graphics.scene.node import Node, NodeType
 from mir_commander.builtin_extensions.molecular_visualizer.graphics.utils import Color4f
-
-from ...config import AtomLabelConfig, SelectedAtom
-from .bounding_sphere import BoundingSphere
-from .label import Label
-from .sphere import Sphere
+from mir_commander.builtin_extensions.molecular_visualizer.graphics_nodes.atom.bounding_sphere import BoundingSphere
+from mir_commander.builtin_extensions.molecular_visualizer.graphics_nodes.atom.label import Label
+from mir_commander.builtin_extensions.molecular_visualizer.graphics_nodes.atom.sphere import Sphere
+from mir_commander.builtin_extensions.utils.chemistry import atomic_number_to_symbol
 
 if TYPE_CHECKING:
-    from ..bond import Bond
+    from mir_commander.builtin_extensions.molecular_visualizer.graphics_nodes.bond import Bond
 
 
 class Atom(Node):

@@ -1,15 +1,18 @@
+from contextlib import ExitStack
 from typing import TYPE_CHECKING
 
+from PySide6.QtCore import QSignalBlocker
 from PySide6.QtWidgets import QCheckBox, QGridLayout, QHBoxLayout, QLabel, QPushButton, QWidget
 
-from .utils import add_slider
+from mir_commander.builtin_extensions.molecular_visualizer.control_elements.utils import add_slider
+from mir_commander.builtin_extensions.molecular_visualizer.state import MolecularVisualizerState
+from mir_commander.builtin_extensions.sdk.base_control_panel import BlockWidget
 
 if TYPE_CHECKING:
-    from ..control_panel import MolecularVisualizerControlPanel
-    from ..program import MolecularVisualizerProgram
+    from mir_commander.builtin_extensions.molecular_visualizer.control_panel import MolecularVisualizerControlPanel
 
 
-class AtomLabels(QWidget):
+class AtomLabels(BlockWidget[MolecularVisualizerState]):
     def __init__(self, control_panel: "MolecularVisualizerControlPanel"):
         super().__init__()
 
@@ -105,12 +108,16 @@ class AtomLabels(QWidget):
     def _toggle_selected_button_clicked_handler(self):
         self._control_panel.program_action_signal.emit("atom_labels.toggle_visibility_for_selected_atoms", {})
 
-    def update_values(self, program: "MolecularVisualizerProgram"):
-        self._size_slider.setValue(program.config.atom_label.size)
-        self._size_double_spinbox.setValue(program.config.atom_label.size)
+    def update_values(self, program_state: MolecularVisualizerState):
+        with ExitStack() as stack:
+            for widget in self.findChildren(QWidget):
+                stack.enter_context(QSignalBlocker(widget))
 
-        self._offset_slider.setValue(int(program.config.atom_label.offset * 100))
-        self._offset_double_spinbox.setValue(program.config.atom_label.offset)
+            self._size_slider.setValue(program_state.atom_label_size)
+            self._size_double_spinbox.setValue(program_state.atom_label_size)
 
-        self._symbol_visible_checkbox.setChecked(program.config.atom_label.symbol_visible)
-        self._number_visible_checkbox.setChecked(program.config.atom_label.number_visible)
+            self._offset_slider.setValue(int(program_state.atom_label_offset * 100))
+            self._offset_double_spinbox.setValue(program_state.atom_label_offset)
+
+            self._symbol_visible_checkbox.setChecked(program_state.atom_label_symbol_visible)
+            self._number_visible_checkbox.setChecked(program_state.atom_label_number_visible)

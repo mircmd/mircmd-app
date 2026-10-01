@@ -1,5 +1,4 @@
 import logging
-from pathlib import Path
 
 import numpy as np
 from PySide6.QtGui import QColorSpace, QImage, QImageWriter

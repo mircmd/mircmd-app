@@ -7,6 +7,7 @@ from PySide6.QtGui import QColor, QIcon, QKeyEvent, QStandardItem, QStandardItem
 from PySide6.QtWidgets import QFrame, QHeaderView, QPushButton, QTableView, QWidget
 
 from mir_commander.builtin_extensions.cartesian_editor.config import Config
+from mir_commander.builtin_extensions.cartesian_editor.state import CartesianEditorState
 from mir_commander.builtin_extensions.utils.chemistry import (
     all_symbols,
     atomic_number_to_symbol,
@@ -430,9 +431,8 @@ class CartesianEditorProgram(BaseProgram):
         if data := self.item.get_data():
             self._widget.load_data(bytes_to_atomic_coordinates(data))
 
-    @property
-    def decimals(self) -> int:
-        return self._widget.decimals
+    def get_state(self) -> bytes:
+        return CartesianEditorState(decimals=self._widget.decimals).serialize()
 
     def node_changed_event(self, node_id: int, action: NodeChangedAction):
         pass

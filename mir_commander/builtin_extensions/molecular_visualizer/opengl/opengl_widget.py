@@ -17,12 +17,11 @@ from mir_commander.builtin_extensions.molecular_visualizer.graphics.resource_man
 from mir_commander.builtin_extensions.molecular_visualizer.graphics.scene.node import Node
 from mir_commander.builtin_extensions.molecular_visualizer.graphics.scene.scene import Scene
 from mir_commander.builtin_extensions.molecular_visualizer.graphics.utils import Color4f, color_to_id
+from mir_commander.builtin_extensions.molecular_visualizer.opengl.action_handler import ActionHandler
+from mir_commander.builtin_extensions.molecular_visualizer.opengl.enums import ClickAndMoveMode, WheelMode
+from mir_commander.builtin_extensions.molecular_visualizer.opengl.keymap import Keymap
 
-from .action_handler import ActionHandler
-from .enums import ClickAndMoveMode, WheelMode
-from .keymap import Keymap
-
-logger = logging.getLogger("UI.SDK.OpenGLWidget")
+logger = logging.getLogger(__name__)
 
 
 class OpenGLWidget(QOpenGLWidget):

@@ -1,10 +1,12 @@
+from typing import Any
+
 from mir_commander.builtin_extensions.molecular_visualizer.algebra import Vector3D
 from mir_commander.builtin_extensions.molecular_visualizer.consts import VAO_CUBE_RESOURCE_NAME
 from mir_commander.builtin_extensions.molecular_visualizer.graphics_nodes.base import BaseGraphicsNode
 
 
 class Sphere(BaseGraphicsNode):
-    def __init__(self, radius: float, *args, **kwargs):
+    def __init__(self, radius: float, *args: Any, **kwargs: Any):
         kwargs["model_name"] = VAO_CUBE_RESOURCE_NAME
         kwargs["shader_params"] = {"lighting_model": 1, "render_mode": 3, "ray_casting_object": 1}
         kwargs["scale"] = Vector3D(radius, radius, radius)

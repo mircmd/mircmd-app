@@ -1,3 +1,5 @@
+from typing import Any
+
 from mir_commander.builtin_extensions.molecular_visualizer.algebra import Vector3D
 from mir_commander.builtin_extensions.molecular_visualizer.graphics.scene.node import Node, NodeType
 from mir_commander.builtin_extensions.molecular_visualizer.graphics.scene.text_node import TextNode
@@ -8,7 +10,7 @@ from mir_commander.builtin_extensions.molecular_visualizer.graphics_nodes.sphere
 
 
 class AxisLabel(TextNode):
-    def __init__(self, color: Color4f, text: str, size: int, *args, **kwargs):
+    def __init__(self, color: Color4f, text: str, size: int, *args: Any, **kwargs: Any):
         self._size = size
 
         s = size / 100.0
@@ -31,7 +33,7 @@ class AxisLabel(TextNode):
 
 
 class Axis(Node):
-    def __init__(self, direction: Vector3D, color: Color4f, text: str, *args, **kwargs):
+    def __init__(self, direction: Vector3D, color: Color4f, text: str, *args: Any, **kwargs: Any):
         kwargs["node_type"] = NodeType.CONTAINER
         kwargs["visible"] = True
         super().__init__(*args, **kwargs)
@@ -135,7 +137,7 @@ class Axis(Node):
 
 
 class CoordinateAxes(Node):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any):
         kwargs["node_type"] = NodeType.CONTAINER
         kwargs["visible"] = False
         super().__init__(*args, **kwargs)

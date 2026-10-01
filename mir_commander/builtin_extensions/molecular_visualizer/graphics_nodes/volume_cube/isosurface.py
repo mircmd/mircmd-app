@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from mir_commander.builtin_extensions.molecular_visualizer.graphics.resource_manager import ResourceManager
 from mir_commander.builtin_extensions.molecular_visualizer.graphics.scene.node import NodeType
@@ -15,7 +15,13 @@ class Isosurface(BaseGraphicsNode):
     parent: "IsosurfaceGroup"  # type: ignore[assignment]
 
     def __init__(
-        self, inverted: bool, color: Color4f, unique_id: int, resource_manager: ResourceManager, *args, **kwargs
+        self,
+        inverted: bool,
+        color: Color4f,
+        unique_id: int,
+        resource_manager: ResourceManager,
+        *args: Any,
+        **kwargs: Any,
     ):
         kwargs["visible"] = True
         kwargs["node_type"] = NodeType.TRANSPARENT if color[3] < 1.0 else NodeType.OPAQUE

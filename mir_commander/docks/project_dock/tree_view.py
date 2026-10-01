@@ -1,7 +1,7 @@
 import logging
 from collections.abc import Callable
 from enum import Enum
-from typing import cast
+from typing import Any, cast
 
 from PySide6.QtCore import QModelIndex, QPoint, QSize, Qt, Signal
 from PySide6.QtGui import QAction, QStandardItemModel
@@ -21,7 +21,7 @@ class ActionType(Enum):
 class TreeView(QTreeView):
     open_item = Signal(Item, str, dict)  # type: ignore[arg-type]
 
-    def __init__(self, item_model: QStandardItemModel, config: TreeConfig, *args, **kwargs):
+    def __init__(self, item_model: QStandardItemModel, config: TreeConfig, *args: Any, **kwargs: Any):
         super().__init__(*args, **kwargs)
 
         self._model = item_model

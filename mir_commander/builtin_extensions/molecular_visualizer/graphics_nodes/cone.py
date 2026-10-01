@@ -1,10 +1,12 @@
+from typing import Any
+
 from mir_commander.builtin_extensions.molecular_visualizer.algebra import Quaternion, Vector3D
 from mir_commander.builtin_extensions.molecular_visualizer.consts import VAO_CONE_RESOURCE_NAME
 from mir_commander.builtin_extensions.molecular_visualizer.graphics_nodes.base import BaseGraphicsNode
 
 
 class Cone(BaseGraphicsNode):
-    def __init__(self, direction: Vector3D, *args, **kwargs):
+    def __init__(self, direction: Vector3D, *args: Any, **kwargs: Any):
         self._radius = 1.0
         self._length = 1.0
 

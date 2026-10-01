@@ -1,4 +1,5 @@
 from collections.abc import Iterable
+from typing import Any
 
 from mir_commander.builtin_extensions.molecular_visualizer.control_elements.appearance import Appearance
 from mir_commander.builtin_extensions.molecular_visualizer.control_elements.atom_labels import AtomLabels
@@ -11,7 +12,7 @@ from mir_commander.builtin_extensions.sdk.base_control_panel import BaseControlP
 
 
 class MolecularVisualizerControlPanel(BaseControlPanel):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any):
         super().__init__()
 
         self._blocks = {

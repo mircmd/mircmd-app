@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Any, Literal
 
 from mir_commander.builtin_extensions.molecular_visualizer.algebra import Vector3D
 from mir_commander.builtin_extensions.molecular_visualizer.graphics.font_atlas import FontAtlas
@@ -14,8 +14,8 @@ class TextNode(Node):
         text: str = "",
         font_atlas_name: str = "default",
         align: Literal["left", "center", "right"] = "center",
-        *args,
-        **kwargs,
+        *args: Any,
+        **kwargs: Any,
     ):
         kwargs["node_type"] = NodeType.TEXT
         super().__init__(*args, **kwargs)

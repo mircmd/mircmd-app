@@ -36,7 +36,7 @@ logger = logging.getLogger(__name__)
 
 
 class ExportFileDialog(QDialog):
-    def __init__(self, node: Item, file_exporter: FileExporter, *args, **kwargs):
+    def __init__(self, node: Item, file_exporter: FileExporter, *args: Any, **kwargs: Any):
         super().__init__(*args, **kwargs)
 
         self._node = node

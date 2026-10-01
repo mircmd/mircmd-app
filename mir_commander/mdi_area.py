@@ -162,7 +162,7 @@ class MdiArea(QMdiArea):
     subWindowList: SubWindowListFn  # type: ignore[assignment]
     currentSubWindow: Callable[[], _MdiProgramWindow]
 
-    def __init__(self, project_window: "ProjectWindow", *args, **kwargs):
+    def __init__(self, project_window: "ProjectWindow", *args: Any, **kwargs: Any):
         super().__init__(*args, **kwargs)
         self._project_window = project_window
 

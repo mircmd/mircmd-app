@@ -1,5 +1,5 @@
 from time import monotonic
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from mir_commander.builtin_extensions.molecular_visualizer.algebra import Vector3D
 from mir_commander.builtin_extensions.molecular_visualizer.config import AtomLabelConfig, SelectedAtom
@@ -23,8 +23,8 @@ class Atom(Node):
         color: Color4f,
         selected_atom_config: SelectedAtom,
         label_config: AtomLabelConfig,
-        *args,
-        **kwargs,
+        *args: Any,
+        **kwargs: Any,
     ):
         super().__init__(*args, **kwargs | dict(node_type=NodeType.CONTAINER))
 

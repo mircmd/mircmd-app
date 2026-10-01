@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import traceback
+from typing import Any
 
 from PySide6.QtCore import QThread, Signal
 
@@ -10,10 +11,10 @@ logger = logging.getLogger(__name__)
 class AsyncWorker(QThread):
     failed_signal = Signal()
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any):
         super().__init__(*args, **kwargs)
-        self._task = None
-        self._loop = None
+        self._task: asyncio.Task[Any] | None = None
+        self._loop: asyncio.AbstractEventLoop | None = None
 
     async def task(self):
         raise NotImplementedError

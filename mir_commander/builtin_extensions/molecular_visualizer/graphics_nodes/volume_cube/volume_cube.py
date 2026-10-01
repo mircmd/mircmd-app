@@ -1,3 +1,5 @@
+from typing import Any
+
 from mir_commander.builtin_extensions.molecular_visualizer.algebra import Vector3D
 from mir_commander.builtin_extensions.molecular_visualizer.entities import (
     VolumeCubeIsosurface,
@@ -21,8 +23,8 @@ class VolumeCube(Node):
         self,
         resource_manager: ResourceManager,
         volume_cube: VolumeCubeDataStructure = VolumeCubeDataStructure(),
-        *args,
-        **kwargs,
+        *args: Any,
+        **kwargs: Any,
     ):
         kwargs["node_type"] = NodeType.CONTAINER
         kwargs["visible"] = True
@@ -65,7 +67,7 @@ class VolumeCube(Node):
         )
         return self._group_node_to_entity(group)
 
-    def set_isosurface_visible(self, id: int, visible: bool, **kwargs):
+    def set_isosurface_visible(self, id: int, visible: bool, **kwargs: bool):
         for group in self.children:
             if group.unique_id == id:
                 group.set_visible(visible, **kwargs)

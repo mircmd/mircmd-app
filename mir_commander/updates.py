@@ -1,6 +1,7 @@
 import asyncio
 import logging
 from datetime import datetime
+from typing import Any
 
 import httpx
 from PySide6.QtCore import Signal
@@ -30,7 +31,7 @@ async def get_latest_version() -> str:
 
 
 class NewVersionNotification(Notification):
-    def __init__(self, app_config: AppConfig, *args, **kwargs):
+    def __init__(self, app_config: AppConfig, *args: Any, **kwargs: Any):
         self._text = QLabel("")
         self._download_link = Link(self.tr("Download"), f"{BASE_URL}/downloads")
         self._release_notes_link = Link(self.tr("Release Notes"), f"{BASE_URL}/changelog")
@@ -70,7 +71,7 @@ class NewVersionNotification(Notification):
 class CheckForUpdates(AsyncWorker):
     latest_version_signal = Signal(str)
 
-    def __init__(self, app_config: AppConfig, *args, **kwargs):
+    def __init__(self, app_config: AppConfig, *args: Any, **kwargs: Any):
         super().__init__(*args, **kwargs)
         self._app_config = app_config
 
@@ -85,7 +86,7 @@ class CheckForUpdates(AsyncWorker):
 
 
 class ApplicationUpdateDialog(QDialog):
-    def __init__(self, app_config: AppConfig, *args, **kwargs):
+    def __init__(self, app_config: AppConfig, *args: Any, **kwargs: Any):
         super().__init__(*args, **kwargs | dict(modal=True))
 
         self._app_config = app_config
@@ -193,7 +194,7 @@ class ApplicationUpdateDialog(QDialog):
 class CheckForUpdatesBackgroundWorker(AsyncWorker):
     new_version_signal = Signal(str)
 
-    def __init__(self, app_config: AppConfig, *args, **kwargs):
+    def __init__(self, app_config: AppConfig, *args: Any, **kwargs: Any):
         super().__init__(*args, **kwargs)
         self._app_config = app_config
 

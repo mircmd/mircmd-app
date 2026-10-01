@@ -1,5 +1,6 @@
 import math
 from copy import copy
+from typing import Any
 
 import numpy as np
 
@@ -23,8 +24,8 @@ class IsosurfaceGroup(Node):
         inverse: bool,
         unique_id: int,
         resource_manager: ResourceManager,
-        *args,
-        **kwargs,
+        *args: Any,
+        **kwargs: Any,
     ):
         kwargs["node_type"] = NodeType.CONTAINER
         kwargs["visible"] = True

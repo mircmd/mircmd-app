@@ -1,3 +1,5 @@
+from typing import Any
+
 from PySide6.QtCore import QSignalBlocker, Qt
 from PySide6.QtWidgets import QCheckBox, QFrame, QScrollArea, QVBoxLayout
 
@@ -13,7 +15,9 @@ class ProgramControlPanelDock(DockWidget):
     A single instance of this class is used for showing widgets with settings for the program.
     """
 
-    def __init__(self, app_config: AppConfig, program_id: str, control_panel: BaseControlPanel, *args, **kwargs):
+    def __init__(
+        self, app_config: AppConfig, program_id: str, control_panel: BaseControlPanel, *args: Any, **kwargs: Any
+    ):
         self._program_id = program_id
 
         super().__init__(*args, **kwargs)

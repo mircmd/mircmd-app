@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 
 from PySide6.QtCore import QFile, QLocale, QResource, Qt, QTranslator
 from PySide6.QtGui import QColor, QFont, QFontDatabase, QOpenGLContext, QPalette, QSurfaceFormat
@@ -17,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 class Application(QApplication):
-    def __init__(self, extensions_manager: ExtensionsManager, *args, **kwargs):
+    def __init__(self, extensions_manager: ExtensionsManager, *args: Any, **kwargs: Any):
         self.setAttribute(Qt.ApplicationAttribute.AA_ShareOpenGLContexts, on=False)
         super().__init__(*args, **kwargs)
         self.setApplicationName("mir_commander")

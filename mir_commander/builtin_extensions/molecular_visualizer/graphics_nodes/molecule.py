@@ -2,6 +2,7 @@ import logging
 import math
 from collections.abc import Generator
 from itertools import combinations
+from typing import Any
 
 import numpy as np
 from pydantic_extra_types.color import Color
@@ -38,8 +39,8 @@ class Molecule(Node):
         geom_bond_tolerance: float,
         style: Style,
         atom_label_config: AtomLabelConfig,
-        *args,
-        **kwargs,
+        *args: Any,
+        **kwargs: Any,
     ):
         super().__init__(*args, **kwargs | {"node_type": NodeType.CONTAINER})
 

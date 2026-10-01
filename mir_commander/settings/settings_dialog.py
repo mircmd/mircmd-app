@@ -199,6 +199,6 @@ class SettingsDialog(QDialog):
     def resizeEvent(self, event: QResizeEvent):
         self._config.size = [event.size().width(), event.size().height()]
 
-    def closeEvent(self, *args, **kwargs):
+    def closeEvent(self, *args: Any, **kwargs: Any):
         for page in self._pages:
             page.cancel()

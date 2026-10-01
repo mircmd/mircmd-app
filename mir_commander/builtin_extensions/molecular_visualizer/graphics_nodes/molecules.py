@@ -1,4 +1,5 @@
 from math import fabs
+from typing import Any
 
 from mir_commander.builtin_extensions.molecular_visualizer.algebra import Vector3D
 from mir_commander.builtin_extensions.molecular_visualizer.config import Style
@@ -10,7 +11,7 @@ from mir_commander.builtin_extensions.molecular_visualizer.graphics_nodes.molecu
 class Molecules(Node):
     children: list[Molecule]  # type: ignore[assignment]
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any):
         kwargs["node_type"] = NodeType.CONTAINER
         kwargs["visible"] = True
         super().__init__(*args, **kwargs)

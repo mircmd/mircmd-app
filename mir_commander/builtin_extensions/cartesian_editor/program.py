@@ -27,7 +27,7 @@ from mir_commander.sdk.base_program import BaseProgram, NodeChangedAction
 
 
 class TableItem(QStandardItem):
-    def __init__(self, *args, index: int, **kwargs):
+    def __init__(self, *args: Any, index: int, **kwargs: Any):
         super().__init__(*args, **kwargs)
         self.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
 
@@ -63,7 +63,7 @@ class TableItem(QStandardItem):
 
 
 class TagItem(TableItem):
-    def __init__(self, tag: int, row_count_fn: Callable[[], int], *args, **kwargs):
+    def __init__(self, tag: int, row_count_fn: Callable[[], int], *args: Any, **kwargs: Any):
         super().__init__(str(tag), *args, **kwargs)
 
         self._row_count_fn = row_count_fn
@@ -104,7 +104,7 @@ class SymbolItem(TableItem):
 
 
 class FloatItem(TableItem):
-    def __init__(self, value: str, *args, **kwargs):
+    def __init__(self, value: str, *args: Any, **kwargs: Any):
         super().__init__(value, *args, **kwargs)
         self.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
 
@@ -140,7 +140,7 @@ class FloatItemZ(FloatItem): ...
 
 
 class AtomicCoordinatesTableView(QTableView):
-    def __init__(self, program: "CartesianEditorProgram", decimals: int = 6, *args, **kwargs):
+    def __init__(self, program: "CartesianEditorProgram", decimals: int = 6, *args: Any, **kwargs: Any):
         super().__init__(*args, **kwargs)
 
         self._program = program
@@ -421,7 +421,7 @@ class AtomicCoordinatesTableView(QTableView):
 
 
 class CartesianEditorProgram(BaseProgram):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any):
         super().__init__(*args, **kwargs)
 
         self.config = Config()

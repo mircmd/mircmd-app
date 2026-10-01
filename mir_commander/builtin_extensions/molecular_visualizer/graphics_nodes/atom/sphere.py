@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from mir_commander.builtin_extensions.molecular_visualizer.algebra import Vector3D
 from mir_commander.builtin_extensions.molecular_visualizer.consts import VAO_CUBE_RESOURCE_NAME
@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 class Sphere(BaseGraphicsNode):
     parent: "Atom"
 
-    def __init__(self, radius: float, *args, **kwargs):
+    def __init__(self, radius: float, *args: Any, **kwargs: Any):
         kwargs["model_name"] = VAO_CUBE_RESOURCE_NAME
         kwargs["shader_params"] = {"lighting_model": 1, "render_mode": 3, "ray_casting_object": 1}
         kwargs["scale"] = Vector3D(radius, radius, radius)

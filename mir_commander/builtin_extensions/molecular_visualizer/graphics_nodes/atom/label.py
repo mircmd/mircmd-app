@@ -1,3 +1,5 @@
+from typing import Any
+
 from mir_commander.builtin_extensions.molecular_visualizer.algebra import Vector3D
 from mir_commander.builtin_extensions.molecular_visualizer.config import AtomLabelConfig
 from mir_commander.builtin_extensions.molecular_visualizer.graphics.scene.text_node import TextNode
@@ -5,7 +7,7 @@ from mir_commander.builtin_extensions.molecular_visualizer.graphics.utils import
 
 
 class Label(TextNode):
-    def __init__(self, config: AtomLabelConfig, symbol: str, number: int, *args, **kwargs):
+    def __init__(self, config: AtomLabelConfig, symbol: str, number: int, *args: Any, **kwargs: Any):
         self._size = config.size / 100.0
         self._show_symbol = config.symbol_visible
         self._show_number = config.number_visible
@@ -36,7 +38,7 @@ class Label(TextNode):
         self.set_scale(Vector3D(s, s, s))
         self.set_font_atlas_name(config.font)
 
-    def set_visible(self, value: bool, *args, **kwargs):
+    def set_visible(self, value: bool, *args: bool, **kwargs: bool):
         if value and not self.children:
             self._update_text()
         super().set_visible(value, *args, **kwargs)

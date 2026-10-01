@@ -1,3 +1,5 @@
+from typing import Any
+
 from mir_commander.builtin_extensions.molecular_visualizer.algebra import Vector3D
 from mir_commander.builtin_extensions.molecular_visualizer.graphics.scene.node import Node, NodeType
 from mir_commander.builtin_extensions.molecular_visualizer.graphics.utils import Color4f
@@ -13,8 +15,8 @@ class Bond(Node):
         radius: float = 0.1,
         atoms_color: bool = True,
         color: Color4f = (0.5, 0.5, 0.5, 1.0),
-        *args,
-        **kwargs,
+        *args: Any,
+        **kwargs: Any,
     ):
         super().__init__(*args, **kwargs | dict(node_type=NodeType.CONTAINER, visible=True))
 

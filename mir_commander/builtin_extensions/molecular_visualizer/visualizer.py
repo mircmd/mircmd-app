@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Any, cast
 
 from PySide6.QtCore import QPoint
 from PySide6.QtGui import QContextMenuEvent
@@ -58,7 +58,7 @@ logger = logging.getLogger(__name__)
 
 
 class Visualizer(OpenGLWidget):
-    def __init__(self, program: "MolecularVisualizerProgram", title: str, config: Config, *args, **kwargs):
+    def __init__(self, program: "MolecularVisualizerProgram", title: str, config: Config, *args: Any, **kwargs: Any):
         super().__init__(*args, **kwargs | {"keymap": Keymap(config.keymap.model_dump())})
 
         self._program = program
@@ -286,7 +286,7 @@ class Visualizer(OpenGLWidget):
     def get_volume_cube_isosurface_groups(self) -> list[VolumeCubeIsosurfaceGroup]:
         return self._volume_cube.isosurface_groups
 
-    def set_volume_cube_isosurface_visible(self, id: int, visible: bool, **kwargs):
+    def set_volume_cube_isosurface_visible(self, id: int, visible: bool, **kwargs: bool):
         self.makeCurrent()
         self._volume_cube.set_isosurface_visible(id, visible, **kwargs)
         self._program.update_control_panel_signal.emit()

@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from PySide6.QtGui import QAction, QKeySequence
 from PySide6.QtWidgets import QMenu
@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 
 
 class ContextMenu(QMenu):
-    def __init__(self, visualizer: "Visualizer", config: Config, *args, **kwargs):
+    def __init__(self, visualizer: "Visualizer", config: Config, *args: Any, **kwargs: Any):
         super().__init__(*args, **kwargs)
 
         self._visualizer = visualizer

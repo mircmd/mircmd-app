@@ -19,7 +19,7 @@ from PySide6.QtWidgets import (
 
 
 class Link(QLabel):
-    def __init__(self, text: str, url: str, *args, **kwargs):
+    def __init__(self, text: str, url: str, *args: Any, **kwargs: Any):
         super().__init__(*args, **kwargs)
 
         self._text = text
@@ -42,7 +42,7 @@ class Link(QLabel):
 
 
 class DockWidget(QDockWidget):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any):
         super().__init__(*args, **kwargs)
 
         self.setAllowedAreas(
@@ -60,7 +60,7 @@ class DockWidget(QDockWidget):
 class ColorButton(QPushButton):
     color_changed = Signal(QColor)
 
-    def __init__(self, color: QColor = QColor(255, 255, 255, a=255), alpha: bool = True, *args, **kwargs):
+    def __init__(self, color: QColor = QColor(255, 255, 255, a=255), alpha: bool = True, *args: Any, **kwargs: Any):
         super().__init__(*args, **kwargs)
         self._color = color
         self._set_style_sheet(color)
@@ -130,7 +130,7 @@ class StackItemHeader(QFrame):
 
 
 class StackItemLayout(QVBoxLayout):
-    def __init__(self, title: str, widget: QWidget, expanded: bool, *args, **kwargs):
+    def __init__(self, title: str, widget: QWidget, expanded: bool, *args: Any, **kwargs: Any):
         super().__init__(*args, **kwargs)
 
         self.setContentsMargins(0, 0, 0, 0)
@@ -188,17 +188,17 @@ class StackItemLayout(QVBoxLayout):
 
 
 class VerticalStackLayout(QVBoxLayout):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any):
         super().__init__(*args, **kwargs)
         self.setContentsMargins(0, 0, 0, 0)
         self.setSpacing(0)
 
-    def add_widget(self, title: str, widget: QWidget, expanded: bool = True, *args, **kwargs):
+    def add_widget(self, title: str, widget: QWidget, expanded: bool = True, *args: Any, **kwargs: Any):
         super().addLayout(StackItemLayout(title, widget, expanded), *args, **kwargs)
 
 
 class TitleBarIcon(QLabel):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any):
         super().__init__(*args, **kwargs)
         self.setScaledContents(True)
 
@@ -315,7 +315,7 @@ class MdiSubWindowTitleBar(QFrame):
 
 
 class MdiSubWindowBody(QFrame):
-    def __init__(self, widget: QWidget, *args, **kwargs):
+    def __init__(self, widget: QWidget, *args: Any, **kwargs: Any):
         super().__init__(*args, **kwargs)
         self._widget = widget
         self._layout = QHBoxLayout()
@@ -449,7 +449,7 @@ class NotificationButton(QPushButton):
 
 
 class Notification(QWidget):
-    def __init__(self, text: QLabel, actions: list[QWidget], options: QMenu | None = None, *args, **kwargs):
+    def __init__(self, text: QLabel, actions: list[QWidget], options: QMenu | None = None, *args: Any, **kwargs: Any):
         super().__init__(*args, **kwargs)
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.SubWindow)
         self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground)

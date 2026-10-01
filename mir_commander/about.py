@@ -1,3 +1,5 @@
+from typing import Any
+
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import (
@@ -17,7 +19,7 @@ from mir_commander.sdk.widgets import Link
 class About(QDialog):
     """Dialog with information about the program."""
 
-    def __init__(self, license_text: str, *args, **kwargs):
+    def __init__(self, license_text: str, *args: Any, **kwargs: Any):
         super().__init__(*args, **kwargs | {"modal": True})
 
         layout = QVBoxLayout(self)

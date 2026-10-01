@@ -37,7 +37,7 @@ logger = logging.getLogger(__name__)
 
 
 class MolecularVisualizerProgram(BaseProgram):
-    def __init__(self, all: bool = False, *args, **kwargs):
+    def __init__(self, all: bool = False, *args: Any, **kwargs: Any):
         self._check_opengl_version()
 
         super().__init__(*args, **kwargs)

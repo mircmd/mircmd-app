@@ -1,3 +1,5 @@
+from typing import Any
+
 from mir_commander.builtin_extensions.molecular_visualizer.algebra import Vector3D
 from mir_commander.builtin_extensions.molecular_visualizer.config import SelectedAtom
 from mir_commander.builtin_extensions.molecular_visualizer.consts import VAO_CUBE_RESOURCE_NAME
@@ -6,7 +8,7 @@ from mir_commander.builtin_extensions.molecular_visualizer.graphics.utils import
 
 
 class BoundingSphere(Node):
-    def __init__(self, config: SelectedAtom, *args, **kwargs):
+    def __init__(self, config: SelectedAtom, *args: Any, **kwargs: Any):
         kwargs["model_name"] = VAO_CUBE_RESOURCE_NAME
         kwargs["shader_params"] = {"render_mode": 3, "ray_casting_object": 1}
         kwargs["color"] = self._compute_color(config)

@@ -1,6 +1,6 @@
 from typing import Any
 
-from PySide6.QtWidgets import QWidget
+from PySide6.QtWidgets import QBoxLayout, QWidget
 
 from mir_commander.app_config import AppConfig
 from mir_commander.project_config import ProjectConfig
@@ -28,8 +28,8 @@ class BasePage(QWidget):
     def post_init(self):
         pass
 
-    def setup_ui(self):
-        raise NotImplementedError()
+    def setup_ui(self) -> QBoxLayout:
+        raise NotImplementedError
 
     def backup_data(self):
         pass

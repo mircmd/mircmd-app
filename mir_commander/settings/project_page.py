@@ -1,11 +1,11 @@
 from PySide6.QtCore import Qt, Slot
-from PySide6.QtWidgets import QHBoxLayout, QLabel, QLineEdit, QVBoxLayout
+from PySide6.QtWidgets import QBoxLayout, QHBoxLayout, QLabel, QLineEdit, QVBoxLayout
 
 from mir_commander.settings.base import BasePage
 
 
 class Project(BasePage):
-    def setup_ui(self):
+    def setup_ui(self) -> QBoxLayout:
         layout = QVBoxLayout()
         layout.addLayout(self._project_name_ui)
         layout.addStretch(1)

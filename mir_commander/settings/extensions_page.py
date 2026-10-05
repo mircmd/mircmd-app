@@ -1,9 +1,14 @@
+from typing import TYPE_CHECKING, cast
+
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QStandardItem, QStandardItemModel
-from PySide6.QtWidgets import QApplication, QTableView, QVBoxLayout
+from PySide6.QtWidgets import QApplication, QBoxLayout, QTableView, QVBoxLayout
 
 from mir_commander.extensions.extensions_manager import Extension
 from mir_commander.settings.base import BasePage
+
+if TYPE_CHECKING:
+    from mir_commander.application import Application
 
 
 class Extensions(BasePage):
@@ -12,7 +17,7 @@ class Extensions(BasePage):
     Displays a table with all registered extensions and their metadata.
     """
 
-    def setup_ui(self):
+    def setup_ui(self) -> QBoxLayout:
         layout = QVBoxLayout()
 
         self._table = QTableView()
@@ -30,7 +35,7 @@ class Extensions(BasePage):
         self._populate_table()
 
     def _populate_table(self):
-        extensions_manager = QApplication.instance().extensions_manager
+        extensions_manager = cast("Application", QApplication.instance()).extensions_manager
         self._model.clear()
 
         headers = [

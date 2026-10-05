@@ -1,6 +1,6 @@
-from typing import Self
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from json import dumps, loads
+from typing import Self
 
 
 @dataclass

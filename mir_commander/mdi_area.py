@@ -1,7 +1,7 @@
 import logging
 from collections import defaultdict
 from collections.abc import Callable
-from typing import TYPE_CHECKING, Any, Protocol
+from typing import TYPE_CHECKING, Any, Protocol, cast
 
 from PySide6.QtCore import QEvent, QSize, Qt, Signal
 from PySide6.QtGui import QBrush, QCloseEvent, QColor, QResizeEvent, QStandardItem, QWindowStateChangeEvent
@@ -14,6 +14,7 @@ from mir_commander.sdk.base_program import MessageChannel, NodeChangedAction
 from mir_commander.sdk.widgets import MdiSubWindowBody, MdiSubWindowTitleBar, ResizableContainer
 
 if TYPE_CHECKING:
+    from mir_commander.application import Application
     from mir_commander.project_window import ProjectWindow
 
 
@@ -38,7 +39,11 @@ class _MdiProgramWindow(QMdiSubWindow):
 
         self._program_id = program_id
 
-        self.program = QApplication.instance().program.get_program(program_id).program_cls(item=item, **kwargs)
+        self.program = (
+            cast("Application", QApplication.instance())
+            .program.get_program(program_id)
+            .program_cls(item=item, **kwargs)
+        )
         self.program_control_panel_dock = program_control_panel_dock
 
         super().__init__(parent=parent)

@@ -1,14 +1,12 @@
-from typing import Generic, TypeVar
-
 from collections.abc import Iterable
 from dataclasses import dataclass, field
+from typing import Generic, TypeVar
 
 from PySide6.QtWidgets import QWidget
 
+from mir_commander.builtin_extensions.sdk.base_program_state import BaseProgramState
 from mir_commander.sdk.base_program import BaseControlPanel as SdkBaseControlPanel
 from mir_commander.sdk.widgets import VerticalStackLayout
-from mir_commander.builtin_extensions.sdk.base_program_state import BaseProgramState
-
 
 T = TypeVar("T", bound=BaseProgramState)
 

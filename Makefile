@@ -69,6 +69,7 @@ lint: check-venv  ## Run linters
 
 .PHONY: format
 format: check-venv  ## Run formatters
+	@$(VIRTUAL_ENV)/bin/ruff check --select I --fix --force-exclude
 	@$(VIRTUAL_ENV)/bin/ruff format --force-exclude
 	@echo "$(COLOUR_GREEN)Formatters completed successfully!$(END_COLOUR)"
 

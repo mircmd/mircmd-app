@@ -1,9 +1,12 @@
 from enum import Enum
-from typing import Any
+from typing import TYPE_CHECKING, Any, cast
 
 from PySide6.QtCore import QObject, Signal
 from PySide6.QtGui import QIcon, QStandardItem
 from PySide6.QtWidgets import QApplication, QWidget
+
+if TYPE_CHECKING:
+    from mir_commander.application import Application
 
 
 class NodeChangedAction: ...
@@ -32,7 +35,7 @@ class BaseProgram(QObject):
         return self.item.text()
 
     def get_icon(self) -> QIcon:
-        if icon_path := QApplication.instance().icons.get_icon_path(self.item.get_type()):
+        if icon_path := cast("Application", QApplication.instance()).icons.get_icon_path(self.item.get_type()):
             return QIcon(str(icon_path))
         return QIcon(":/core/icons/unknown_node_type.png")
 

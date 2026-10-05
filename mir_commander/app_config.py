@@ -1,11 +1,11 @@
 from collections.abc import Callable
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from typing import Any, Literal
 
 from pydantic import Field, field_validator
 
-from mir_commander.sdk.config import BaseConfig, BaseModel
 from mir_commander.docks.config import DocksConfig
+from mir_commander.sdk.config import BaseConfig, BaseModel
 from mir_commander.settings.config import SettingsConfig
 
 
@@ -95,12 +95,17 @@ class UpdatesConfig(BaseModel):
     interval: int = Field(
         default=4, ge=1, le=24, description="Interval in hours to check for updates in the background"
     )
-    last_check: datetime = Field(default=datetime.now() - timedelta(hours=4), description="Last check for updates")
+    last_check: datetime = Field(
+        default=datetime.now(tz=UTC) - timedelta(hours=4), description="Last check for updates"
+    )
 
     @field_validator("last_check", mode="before")
     @classmethod
-    def last_check_parser(cls, value: str) -> datetime:
-        return datetime.strptime(value, "%Y-%m-%dT%H:%M:%S.%f")
+    def last_check_parser(cls, value: str | datetime) -> datetime:
+        if isinstance(value, str):
+            value = datetime.fromisoformat(value)
+        # Legacy timestamps without an offset were saved in local time.
+        return value.astimezone(UTC)
 
 
 class AppConfig(BaseConfig):

@@ -3,8 +3,8 @@ from typing import TYPE_CHECKING
 from PySide6.QtCore import QSignalBlocker
 from PySide6.QtWidgets import QGridLayout, QLabel, QSpinBox
 
-from mir_commander.builtin_extensions.sdk.base_control_panel import BlockWidget
 from mir_commander.builtin_extensions.cartesian_editor.state import CartesianEditorState
+from mir_commander.builtin_extensions.sdk.base_control_panel import BlockWidget
 
 if TYPE_CHECKING:
     from mir_commander.builtin_extensions.cartesian_editor.control_panel import CartesianEditorControlPanel

@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any
 
 import httpx
@@ -78,7 +78,7 @@ class CheckForUpdates(AsyncWorker):
     async def task(self):
         try:
             self.latest_version_signal.emit(await get_latest_version())
-            self._app_config.updates.last_check = datetime.now()
+            self._app_config.updates.last_check = datetime.now(tz=UTC)
             self._app_config.dump()
         except NetworkError as e:
             logger.error("Failed to check for updates: %s", e)
@@ -87,7 +87,7 @@ class CheckForUpdates(AsyncWorker):
 
 class ApplicationUpdateDialog(QDialog):
     def __init__(self, app_config: AppConfig, *args: Any, **kwargs: Any):
-        super().__init__(*args, **kwargs | dict(modal=True))
+        super().__init__(*args, **kwargs | {"modal": True})
 
         self._app_config = app_config
         self._check_for_updates = CheckForUpdates(app_config)
@@ -201,12 +201,12 @@ class CheckForUpdatesBackgroundWorker(AsyncWorker):
     async def task(self):
         interval = self._app_config.updates.interval * 3600
         while True:
-            last_check_seconds = (datetime.now() - self._app_config.updates.last_check).total_seconds()
+            last_check_seconds = (datetime.now(tz=UTC) - self._app_config.updates.last_check).total_seconds()
             if interval > last_check_seconds:
                 await asyncio.sleep(600)
                 continue
 
-            self._app_config.updates.last_check = datetime.now()
+            self._app_config.updates.last_check = datetime.now(tz=UTC)
             self._app_config.dump()
 
             if self._app_config.updates.check_in_background is False:

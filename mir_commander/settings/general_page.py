@@ -1,5 +1,15 @@
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QCheckBox, QComboBox, QGroupBox, QHBoxLayout, QLabel, QListView, QSpinBox, QVBoxLayout
+from PySide6.QtWidgets import (
+    QBoxLayout,
+    QCheckBox,
+    QComboBox,
+    QGroupBox,
+    QHBoxLayout,
+    QLabel,
+    QListView,
+    QSpinBox,
+    QVBoxLayout,
+)
 
 from mir_commander.app_config import AppConfig
 from mir_commander.settings.base import BasePage
@@ -12,7 +22,7 @@ class General(BasePage):
     The particular UI elements may migrate to other pages.
     """
 
-    def setup_ui(self):
+    def setup_ui(self) -> QBoxLayout:
         layout = QVBoxLayout()
 
         interface_group_box = QGroupBox(self.tr("Interface"))

@@ -1,6 +1,7 @@
+from io import BytesIO
+
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
-from io import BytesIO
 from pydantic import BaseModel
 
 

@@ -1,7 +1,7 @@
 import logging
 from collections.abc import Callable
 from enum import Enum
-from typing import Any, cast
+from typing import TYPE_CHECKING, Any, cast
 
 from PySide6.QtCore import QModelIndex, QPoint, QSize, Qt, Signal
 from PySide6.QtGui import QAction, QStandardItemModel
@@ -10,6 +10,9 @@ from PySide6.QtWidgets import QApplication, QMenu, QTreeView
 from mir_commander.app_config import ImportFileRulesConfig
 from mir_commander.docks.project_dock.config import TreeConfig
 from mir_commander.item import Item
+
+if TYPE_CHECKING:
+    from mir_commander.application import Application
 
 logger = logging.getLogger(__name__)
 
@@ -92,7 +95,7 @@ class TreeView(QTreeView):
             self.setExpanded(index, not self.isExpanded(index))
 
     def import_file(self, parent: Item) -> None:
-        QApplication.instance().project_window.import_files_dialog(parent)
+        cast("Application", QApplication.instance()).project_window.import_files_dialog(parent)
 
     def add_item(self, item: Item):
         self._model.invisibleRootItem().appendRow(item)

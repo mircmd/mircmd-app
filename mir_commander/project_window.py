@@ -3,6 +3,7 @@ import logging
 from dataclasses import dataclass
 from functools import partial
 from pathlib import Path
+from typing import TYPE_CHECKING, cast
 
 from PySide6.QtCore import QCoreApplication, QFile, Qt, Signal, Slot
 from PySide6.QtGui import QAction, QCloseEvent, QIcon, QKeySequence, QStandardItemModel
@@ -31,6 +32,9 @@ from mir_commander.project_config import ProjectConfig
 from mir_commander.sdk.base_program import MessageChannel
 from mir_commander.settings.settings_dialog import SettingsDialog
 from mir_commander.updates import ApplicationUpdateDialog, CheckForUpdatesBackgroundWorker, NewVersionNotification
+
+if TYPE_CHECKING:
+    from mir_commander.application import Application
 
 logger = logging.getLogger(__name__)
 
@@ -100,7 +104,7 @@ class ProjectWindow(QMainWindow):
             return ""
 
     def import_file(self, file_path: Path, parent: Item | None = None):
-        file_importer = QApplication.instance().file_importer
+        file_importer = cast("Application", QApplication.instance()).file_importer
         try:
             logs: list[str] = []
 
@@ -329,7 +333,7 @@ class ProjectWindow(QMainWindow):
 
     def add_program_control_panel(self, program_id: str) -> None | ProgramControlPanelDock:
         if program_id not in self._programs_control_panels:
-            program = QApplication.instance().program.get_program(program_id)
+            program = cast("Application", QApplication.instance()).program.get_program(program_id)
             if program.control_panel_cls is None:
                 return None
             control_panel = program.control_panel_cls()
@@ -364,7 +368,7 @@ class ProjectWindow(QMainWindow):
                 self.import_file(Path(file_path), parent)
 
     def export_file(self, item: Item):
-        file_exporter = QApplication.instance().file_exporter
+        file_exporter = cast("Application", QApplication.instance()).file_exporter
         dialog = ExportFileDialog(item, file_exporter, parent=self)
 
         if dialog.exec() == QDialog.DialogCode.Accepted:

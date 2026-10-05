@@ -15,23 +15,23 @@ class MolecularVisualizerControlPanel(BaseControlPanel):
     def __init__(self, *args: Any, **kwargs: Any):
         super().__init__()
 
-        self._blocks = {
-            "view": ControlBlock(self.tr("View"), View(self), True),
-            "atom_labels": ControlBlock(self.tr("Atom labels"), AtomLabels(self), False),
-            "cubes_and_surfaces": ControlBlock(self.tr("Cubes and surfaces"), VolumeCube(self), False),
-            "image": ControlBlock(self.tr("Image"), Image(self), False),
-            "coordinate_axes": ControlBlock(self.tr("Coordinate axes"), CoordinateAxes(self), False),
-            "appearance": ControlBlock(self.tr("Appearance"), Appearance(self), False),
-        }
+        self._blocks = [
+            ControlBlock(self.tr("View"), View(self), True),
+            ControlBlock(self.tr("Atom labels"), AtomLabels(self), False),
+            ControlBlock(self.tr("Cubes and surfaces"), VolumeCube(self), False),
+            ControlBlock(self.tr("Image"), Image(self), False),
+            ControlBlock(self.tr("Coordinate axes"), CoordinateAxes(self), False),
+            ControlBlock(self.tr("Appearance"), Appearance(self), False),
+        ]
 
     def allows_apply_for_all(self) -> bool:
         return True
 
     def get_blocks(self) -> Iterable[ControlBlock]:
-        return self._blocks.values()
+        return self._blocks
 
     def update_event(self, program_state: bytes):
         state = MolecularVisualizerState.deserialize(program_state)
 
-        for block in self._blocks.values():
+        for block in self._blocks:
             block.widget.update_values(state)

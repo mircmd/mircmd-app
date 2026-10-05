@@ -1,7 +1,6 @@
 from mir_commander.builtin_extensions.cartesian_editor.control_elements.general import General
-from mir_commander.builtin_extensions.sdk.base_control_panel import BaseControlPanel, ControlBlock
-
 from mir_commander.builtin_extensions.cartesian_editor.state import CartesianEditorState
+from mir_commander.builtin_extensions.sdk.base_control_panel import BaseControlPanel, ControlBlock
 
 
 class CartesianEditorControlPanel(BaseControlPanel):

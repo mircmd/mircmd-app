@@ -85,7 +85,6 @@ shortcut_dir = "StartMenuFolder"
 packages = [
     "mir_commander",
     # the following packages are required by plugins
-    "cclib",
     "httpx",
     "PIL",
     "pydantic_extra_types",

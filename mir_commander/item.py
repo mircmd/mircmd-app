@@ -1,7 +1,12 @@
+from typing import TYPE_CHECKING, cast
+
 from PySide6.QtGui import QIcon, QStandardItem
 from PySide6.QtWidgets import QApplication
 
 from mir_commander.extensions.extensions_manager import ProgramExtension
+
+if TYPE_CHECKING:
+    from mir_commander.application import Application
 
 
 class Item(QStandardItem):
@@ -19,7 +24,7 @@ class Item(QStandardItem):
         Item._id_counter += 1
         self._id = Item._id_counter
 
-        if icon_path := QApplication.instance().icons.get_icon_path(self._type):
+        if icon_path := cast("Application", QApplication.instance()).icons.get_icon_path(self._type):
             self.setIcon(QIcon(str(icon_path)))
         else:
             self.setIcon(QIcon(":/core/icons/unknown_node_type.png"))
@@ -37,7 +42,7 @@ class Item(QStandardItem):
         return self._actions
 
     def get_supported_programs(self) -> list[ProgramExtension]:
-        return QApplication.instance().program.get_supported_programs(self.get_type())
+        return cast("Application", QApplication.instance()).program.get_supported_programs(self.get_type())
 
     def get_default_program(self) -> ProgramExtension | None:
         return None

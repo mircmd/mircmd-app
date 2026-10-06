@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, cast
 
 from PySide6.QtCore import QCoreApplication, QFile, Qt, Signal, Slot
-from PySide6.QtGui import QAction, QCloseEvent, QIcon, QKeySequence, QStandardItemModel
+from PySide6.QtGui import QAction, QCloseEvent, QIcon, QKeySequence, QResizeEvent, QStandardItemModel
 from PySide6.QtWidgets import (
     QApplication,
     QDialog,
@@ -25,7 +25,7 @@ from mir_commander.docks.console_dock import ConsoleDock
 from mir_commander.docks.program_control_panel import ProgramControlPanelDock
 from mir_commander.docks.project_dock.project_dock import ProjectDock
 from mir_commander.export_item_dialog import ExportFileDialog
-from mir_commander.extensions.errors import FileExporterError, FileImporterError
+from mir_commander.extensions.errors import FileImporterError
 from mir_commander.item import Item
 from mir_commander.mdi_area import MdiArea
 from mir_commander.project_config import ProjectConfig
@@ -303,7 +303,7 @@ class ProjectWindow(QMainWindow):
         else:
             self.showNormal()
 
-    def resizeEvent(self, event):
+    def resizeEvent(self, event: QResizeEvent):
         self._new_version_notification.update_position()
         super().resizeEvent(event)
 
@@ -372,14 +372,7 @@ class ProjectWindow(QMainWindow):
         dialog = ExportFileDialog(item, file_exporter, parent=self)
 
         if dialog.exec() == QDialog.DialogCode.Accepted:
-            path, extension_id, format_settings = dialog.get_params()
-            try:
-                file_exporter.export_file(node=item, extension_id=extension_id, path=path, params=format_settings)
-                self.status_bar.showMessage(self.tr("File exported successfully"), 3000)
-            except FileExporterError as e:
-                logger.error("Failed to export file: %s", e)
-                self.docks.console.append(self.tr("Failed to export file: {}").format(e))
-                self.status_bar.showMessage(self.tr("Failed to export file"), 5000)
+            self.status_bar.showMessage(self.tr("File exported successfully"), 3000)
 
     @Slot()
     def update_window_menu(self):

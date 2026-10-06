@@ -167,6 +167,26 @@
         <source>Cancel</source>
         <translation>Отмена</translation>
     </message>
+    <message>
+        <source>Extension:</source>
+        <translation>Расширение:</translation>
+    </message>
+    <message>
+        <source>No export formats are available for this object.</source>
+        <translation>Для этого объекта нет доступных форматов экспорта.</translation>
+    </message>
+    <message>
+        <source>Replace file?</source>
+        <translation>Заменить файл?</translation>
+    </message>
+    <message>
+        <source>Replace {}?</source>
+        <translation>Заменить {}?</translation>
+    </message>
+    <message>
+        <source>Choose an output file</source>
+        <translation>Выберите выходной файл</translation>
+    </message>
 </context>
 <context>
     <name>General</name>
@@ -608,6 +628,17 @@
         <location filename="../../mir_commander/ui/docks/project_dock/tree_view.py" line="94"/>
         <source>VS_All</source>
         <translation>Все</translation>
+    </message>
+</context>
+<context>
+    <name>SchemaSettingsWidget</name>
+    <message>
+        <source>Use</source>
+        <translation>Использовать</translation>
+    </message>
+    <message>
+        <source>Settings (JSON)</source>
+        <translation>Настройки (JSON)</translation>
     </message>
 </context>
 </TS>

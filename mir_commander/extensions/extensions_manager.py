@@ -5,13 +5,16 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 import yaml
+from jsonschema.exceptions import SchemaError
 from pydantic import ValidationError
 
+import mir_commander_file_exporter_host
 from mir_commander.builtin_extensions.cartesian_editor.control_panel import CartesianEditorControlPanel
 from mir_commander.builtin_extensions.cartesian_editor.program import CartesianEditorProgram
 from mir_commander.builtin_extensions.molecular_visualizer.control_panel import MolecularVisualizerControlPanel
 from mir_commander.builtin_extensions.molecular_visualizer.program import MolecularVisualizerProgram
 from mir_commander.extensions.errors import ExtensionsManagerError
+from mir_commander.extensions.export_format import FileExportFormat
 from mir_commander.extensions.manifest import ExtensionManifest, ExtensionProtocol, ExtensionType, Metadata
 from mir_commander.sdk.base_program import BaseControlPanel, BaseProgram
 
@@ -38,14 +41,14 @@ class FileImporterExtension(Extension):
 @dataclass
 class FileExporterExtension(Extension):
     wasm_path: Path
-    supported_node_types: list[str]
+    formats: list[FileExportFormat]
 
 
 @dataclass
 class ProgramExtension(Extension):
     supported_node_types: list[str]
     program_cls: type[BaseProgram]
-    control_panel_cls: type[BaseControlPanel]
+    control_panel_cls: type[BaseControlPanel] | None
 
 
 @dataclass
@@ -135,6 +138,8 @@ class ExtensionsManager:
             self._load_icons_extension(extension_manifest, extension_entry)
         elif extension_manifest.type == ExtensionType.FILE_IMPORTER:
             self._load_file_importer_extension(extension_manifest, extension_entry)
+        elif extension_manifest.type == ExtensionType.FILE_EXPORTER:
+            self._load_file_exporter_extension(extension_manifest, extension_entry)
 
     def _load_icons_extension(self, manifest: ExtensionManifest, entry: Path):
         json_path = entry / "extension.json"
@@ -154,6 +159,29 @@ class ExtensionsManager:
             manifest=manifest,
             enabled=True,
             wasm_path=wasm_path,
+        )
+
+    def _load_file_exporter_extension(self, manifest: ExtensionManifest, entry: Path):
+        wasm_path = entry / "extension.wasm"
+        if not wasm_path.is_file():
+            raise ExtensionsManagerError(f"WASM file not found: {wasm_path}")
+        try:
+            formats = [
+                FileExportFormat(
+                    id=fmt.id,
+                    name=fmt.name,
+                    extensions=fmt.extensions,
+                    supported_node_types=fmt.supported_node_types,
+                    settings_schema=json.loads(fmt.settings_schema) if fmt.settings_schema is not None else None,
+                )
+                for fmt in mir_commander_file_exporter_host.formats(str(wasm_path))
+            ]
+            if not formats or len({fmt.id for fmt in formats}) != len(formats):
+                raise ValueError("Exporter must provide formats with unique IDs")
+        except (ImportError, RuntimeError, AttributeError, ValueError, SchemaError) as error:
+            raise ExtensionsManagerError(f"Invalid file exporter {manifest.metadata.id}: {error}") from error
+        self._extensions_registry.file_exporters[manifest.metadata.id] = FileExporterExtension(
+            manifest=manifest, enabled=True, wasm_path=wasm_path, formats=formats
         )
 
     def get_icons(self) -> Iterable[IconsExtension]:

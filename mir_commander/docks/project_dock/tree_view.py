@@ -41,9 +41,8 @@ class TreeView(QTreeView):
 
     def _show_context_menu(self, pos: QPoint):
         item: Item = cast(Item, self._model.itemFromIndex(self.indexAt(pos)))
-        if item:
-            if menu := self._build_context_menu(item):
-                menu.exec(self.mapToGlobal(pos))
+        if item and (menu := self._build_context_menu(item)):
+            menu.exec(self.mapToGlobal(pos))
 
     def _build_context_menu(self, item: Item) -> QMenu | None:
         result = QMenu()
@@ -52,12 +51,11 @@ class TreeView(QTreeView):
         import_file_action.triggered.connect(lambda: self.import_file(item))
         result.addAction(import_file_action)
 
-        # for exporter in self._file_manager.get_exporters():
-        #     if item.project_node.type in exporter.plugin.details.supported_node_types:
-        #         export_item_action = QAction(text=self.tr("Export..."), parent=result)
-        #         export_item_action.triggered.connect(lambda: self.export_item(item))
-        #         result.addAction(export_item_action)
-        #         break
+        application = cast("Application", QApplication.instance())
+        if application.file_exporter.get_exporters(item.get_type()):
+            export_item_action = QAction(text=self.tr("Export..."), parent=result)
+            export_item_action.triggered.connect(lambda: application.project_window.export_file(item))
+            result.addAction(export_item_action)
 
         def trigger(program_id: str) -> Callable[[], None]:
             return lambda: self.open_item.emit(item, program_id, {})

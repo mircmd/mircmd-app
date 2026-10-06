@@ -8,6 +8,20 @@ Currently, in Mir Commander we are focused on the development of basic functiona
 
 ## Development
 
+### WASM file export extensions
+
+File exporters are Rust WASI components, discovered from `manifest.yaml` with
+`type: file_exporter`. Each component advertises formats with their supported
+object types and optional JSON Schema settings. Compatible objects expose
+`Export...` in the tree context menu. The dialog lets you choose an extension,
+format, settings and output file.
+
+The chemistry repository's `files-exporter` component exports
+`mircmd:chemistry:atomic_coordinates` to XYZ. Build and install it with
+`make install` in that directory, then restart the application. See the
+[host and protocol documentation](mir_commander_file_exporter_host/README.md)
+for the interface, form rendering and integration tests.
+
 ### Linux/Mac
 
 As a prerequisite, you have to create a virtual environment and install the required packages (in the command line):

@@ -4,8 +4,10 @@ description = "A modern, powerful graphical user interface for molecular structu
 license-files = ["resources/policy/LICENSE.txt"]
 requires-python = ">=3.14.5, <4"
 dependencies = [
+    "mir-commander-file-exporter-host",
     "mir-commander-file-importer-host",
     "httpx~=0.28.1",
+    "jsonschema>=4.23,<5",
     "numpy~=2.5.3",
     "pillow~=12.3.0",
     "pydantic~=2.13.0",
@@ -42,6 +44,7 @@ dev = [
 [tool.uv]
 
 [tool.uv.sources]
+mir-commander-file-exporter-host = { path = "mir_commander_file_exporter_host" }
 mir-commander-file-importer-host = { path = "mir_commander_file_importer_host" }
 
 [[tool.uv.index]]
@@ -58,6 +61,7 @@ py-modules = []
 version = { attr = "mir_commander.__version__" }
 
 [tool.mypy]
+mypy_path = "$MYPY_CONFIG_FILE_DIR/mir_commander_file_exporter_host"
 ignore_missing_imports = true
 check_untyped_defs = true
 explicit_package_bases = true

@@ -1,13 +1,12 @@
-from pathlib import Path
 from typing import Literal
 
 from pydantic import Field
 from PySide6.QtWidgets import QDoubleSpinBox, QWidget
 
-from mir_commander.sdk.ui_dsl.widgets.base import Widget
+from mir_commander.sdk.ui_dsl.widgets.base import BuildContext, ValueWidget
 
 
-class NumberInputFloat(Widget):
+class NumberInputFloat(ValueWidget):
     type: Literal["number_input_float"]
     min_value: float
     max_value: float
@@ -17,7 +16,9 @@ class NumberInputFloat(Widget):
     prefix: str = ""
     suffix: str = ""
 
-    def build(self, extension_path: Path, parent: QWidget | None) -> QDoubleSpinBox:
+    on_change: str = ""
+
+    def build(self, context: BuildContext, parent: QWidget | None) -> QDoubleSpinBox:
         widget = QDoubleSpinBox(parent=parent)
         # Decimals before range and value, otherwise Qt rounds them to the default 2 decimals.
         widget.setDecimals(self.decimals)
@@ -26,5 +27,10 @@ class NumberInputFloat(Widget):
         widget.setValue(self.value)
         widget.setPrefix(self.prefix)
         widget.setSuffix(self.suffix)
+        # Report the value when editing is finished, not on every typed digit.
+        widget.setKeyboardTracking(False)
         widget.setEnabled(self.enabled)
+        context.values[self.id] = widget.value
+        if len(self.on_change) > 0:
+            widget.valueChanged.connect(lambda value: self.emit(context, self.on_change, value))
         return widget

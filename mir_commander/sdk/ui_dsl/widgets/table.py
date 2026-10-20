@@ -1,10 +1,9 @@
-from pathlib import Path
 from typing import Literal, Self
 
 from pydantic import Field, model_validator
 from PySide6.QtWidgets import QAbstractItemView, QHeaderView, QTableWidget, QTableWidgetItem, QWidget
 
-from mir_commander.sdk.ui_dsl.widgets.base import Widget
+from mir_commander.sdk.ui_dsl.widgets.base import BuildContext, Widget
 
 
 class Table(Widget):
@@ -19,7 +18,7 @@ class Table(Widget):
                 raise ValueError(f"row {i} has {len(row)} cells, but there are only {len(self.headers)} columns")
         return self
 
-    def build(self, extension_path: Path, parent: QWidget | None) -> QTableWidget:
+    def build(self, context: BuildContext, parent: QWidget | None) -> QTableWidget:
         widget = QTableWidget(len(self.data), len(self.headers), parent=parent)
         widget.setHorizontalHeaderLabels(self.headers)
         # Short rows leave the remaining cells empty.

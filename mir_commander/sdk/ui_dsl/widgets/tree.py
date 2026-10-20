@@ -1,10 +1,9 @@
-from pathlib import Path
 from typing import Literal, Self
 
 from pydantic import BaseModel, Field, model_validator
 from PySide6.QtWidgets import QAbstractItemView, QHeaderView, QTreeWidget, QTreeWidgetItem, QWidget
 
-from mir_commander.sdk.ui_dsl.widgets.base import Widget
+from mir_commander.sdk.ui_dsl.widgets.base import BuildContext, Widget
 
 
 class TreeNode(BaseModel):
@@ -39,7 +38,7 @@ class Tree(Widget):
                 raise ValueError(f"node {i} has a row of {cells} cells, but there are only {len(self.headers)} columns")
         return self
 
-    def build(self, extension_path: Path, parent: QWidget | None) -> QTreeWidget:
+    def build(self, context: BuildContext, parent: QWidget | None) -> QTreeWidget:
         widget = QTreeWidget(parent=parent)
         widget.setHeaderLabels(self.headers)
         for node in self.data:

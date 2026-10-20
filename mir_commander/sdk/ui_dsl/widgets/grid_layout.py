@@ -1,10 +1,9 @@
-from pathlib import Path
 from typing import TYPE_CHECKING, Literal
 
 from pydantic import BaseModel, Field
 from PySide6.QtWidgets import QGridLayout, QWidget
 
-from mir_commander.sdk.ui_dsl.widgets.base import ALIGN, Align, AlignLeft, Layout, Widget
+from mir_commander.sdk.ui_dsl.widgets.base import ALIGN, Align, AlignLeft, BuildContext, Layout, UiItem, Widget
 
 if TYPE_CHECKING:
     from mir_commander.sdk.ui_dsl.schema import ITEMS
@@ -23,11 +22,11 @@ class GridLayout(Layout):
     type: Literal["grid_layout"]
     items: list[GridItem]
 
-    def build(self, extension_path: Path, parent: QWidget) -> QGridLayout:
+    def build(self, context: BuildContext, parent: QWidget) -> QGridLayout:
         layout = QGridLayout()
         for item in self.items:
             if isinstance(item.item, Widget):
-                if q_widget := item.item.build(extension_path, parent):
+                if q_widget := item.item.build(context, parent):
                     layout.addWidget(
                         q_widget,
                         item.row,
@@ -37,7 +36,7 @@ class GridLayout(Layout):
                         alignment=ALIGN.get(item.align, AlignLeft),
                     )
             else:
-                if q_layout := item.item.build(extension_path, parent):
+                if q_layout := item.item.build(context, parent):
                     layout.addLayout(
                         q_layout,
                         item.row,
@@ -47,3 +46,6 @@ class GridLayout(Layout):
                         alignment=ALIGN.get(item.align, AlignLeft),
                     )
         return layout
+
+    def children(self) -> list[UiItem]:
+        return [item.item for item in self.items]

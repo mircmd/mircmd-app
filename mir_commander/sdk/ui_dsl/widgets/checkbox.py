@@ -4,7 +4,7 @@ from typing import Literal
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QCheckBox, QWidget
 
-from mir_commander.sdk.ui_dsl.widgets.base import BuildContext, ValueWidget
+from mir_commander.sdk.ui_dsl.widgets.base import ValueWidget
 
 
 class CheckState(Enum):
@@ -22,19 +22,22 @@ CHECK_STATE = {
 _FROM_QT_CHECK_STATE = {qt_state: state for state, qt_state in CHECK_STATE.items()}
 
 
-class Checkbox(ValueWidget):
+class Checkbox(ValueWidget[QCheckBox]):
     type: Literal["checkbox"]
     state: CheckState
 
     on_change: str = ""
 
-    def build(self, context: BuildContext, parent: QWidget | None) -> QCheckBox:
+    def create(self, parent: QWidget | None) -> QCheckBox:
         widget = QCheckBox(parent=parent)
-        widget.setCheckState(CHECK_STATE[self.state])
-        widget.setEnabled(self.enabled)
-        context.values[self.id] = lambda: _FROM_QT_CHECK_STATE[widget.checkState()].value
-        if len(self.on_change) > 0:
-            widget.checkStateChanged.connect(
-                lambda state: self.emit(context, self.on_change, _FROM_QT_CHECK_STATE[state].value)
-            )
+        widget.checkStateChanged.connect(lambda state: self.emit(self.on_change, _FROM_QT_CHECK_STATE[state].value))
         return widget
+
+    def apply(self, changed: set[str]) -> None:
+        super().apply(changed)
+        widget = self.widget
+        if "state" in changed:
+            widget.setCheckState(CHECK_STATE[self.state])
+
+    def read(self) -> str:
+        return _FROM_QT_CHECK_STATE[self.widget.checkState()].value

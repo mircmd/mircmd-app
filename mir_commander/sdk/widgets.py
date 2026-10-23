@@ -65,9 +65,7 @@ class ColorButton(QPushButton):
         self._color = color
         self._set_style_sheet(color)
         self.clicked.connect(self.clicked_handler)
-        self._color_dialog_kwargs: dict[str, Any] = (
-            {"options": QColorDialog.ColorDialogOption.ShowAlphaChannel} if alpha else {}
-        )
+        self.set_alpha(alpha)
 
     @property
     def color(self) -> QColor:
@@ -80,6 +78,11 @@ class ColorButton(QPushButton):
     def setEnabled(self, enabled: bool):
         super().setEnabled(enabled)
         self._set_style_sheet(self._color)
+
+    def set_alpha(self, alpha: bool):
+        self._color_dialog_kwargs: dict[str, Any] = (
+            {"options": QColorDialog.ColorDialogOption.ShowAlphaChannel} if alpha else {}
+        )
 
     def set_color(self, color: QColor):
         self._color = color

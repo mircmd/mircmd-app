@@ -3,22 +3,25 @@ from typing import Literal
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QPushButton, QWidget
 
-from mir_commander.sdk.ui_dsl.widgets.base import BuildContext, Widget
+from mir_commander.sdk.ui_dsl.widgets.base import Widget
 
 
-class Button(Widget):
+class Button(Widget[QPushButton]):
     type: Literal["button"]
     text: str = ""
     icon: str = ""
 
     on_click: str = ""
 
-    def build(self, context: BuildContext, parent: QWidget | None) -> QPushButton:
-        if self.icon:
-            widget = QPushButton(QIcon(str(context.extension_path / self.icon)), self.text, parent=parent)
-        else:
-            widget = QPushButton(self.text, parent=parent)
-        widget.setEnabled(self.enabled)
-        if len(self.on_click) > 0:
-            widget.clicked.connect(lambda: self.emit(context, self.on_click, {}))
+    def create(self, parent: QWidget | None) -> QPushButton:
+        widget = QPushButton(parent=parent)
+        widget.clicked.connect(lambda: self.emit(self.on_click, {}))
         return widget
+
+    def apply(self, changed: set[str]) -> None:
+        super().apply(changed)
+        widget = self.widget
+        if "text" in changed:
+            widget.setText(self.text)
+        if "icon" in changed:
+            widget.setIcon(QIcon(str(self.context.extension_path / self.icon)) if self.icon else QIcon())

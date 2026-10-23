@@ -3,7 +3,7 @@ from typing import Self
 
 from pydantic import BaseModel, Field, model_validator
 
-from mir_commander.sdk.ui_dsl.widgets.base import Layout, UiItem, ValueWidget, Widget
+from mir_commander.sdk.ui_dsl.widgets.base import Layout, UiItem, Widget
 from mir_commander.sdk.ui_dsl.widgets.button import Button
 from mir_commander.sdk.ui_dsl.widgets.checkbox import Checkbox
 from mir_commander.sdk.ui_dsl.widgets.color_picker import ColorPicker
@@ -62,12 +62,6 @@ class Root(BaseModel):
                 raise ValueError(f"id {item.id!r} is used more than once")
             items[item.id] = item
         for item in items.values():
-            if not isinstance(item, Widget):
-                continue
-            for id in item.collect:
-                if id not in items:
-                    raise ValueError(f"{item.id!r} collects {id!r}, which does not exist")
-                if not isinstance(items[id], ValueWidget):
-                    # Pydantic reports only ValueError as a validation error.
-                    raise ValueError(f"{item.id!r} collects {id!r}, which has no value")  # noqa: TRY004
+            if isinstance(item, Widget):
+                item.check_collect(items)
         return self

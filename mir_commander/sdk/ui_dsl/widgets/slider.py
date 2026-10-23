@@ -4,10 +4,10 @@ from pydantic import Field
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QSlider, QWidget
 
-from mir_commander.sdk.ui_dsl.widgets.base import ORIENTATION, BuildContext, Orientation, ValueWidget
+from mir_commander.sdk.ui_dsl.widgets.base import ORIENTATION, Orientation, ValueWidget
 
 
-class Slider(ValueWidget):
+class Slider(ValueWidget[QSlider]):
     type: Literal["slider"]
     orientation: Orientation
     min_value: int
@@ -19,14 +19,25 @@ class Slider(ValueWidget):
 
     on_change: str = ""
 
-    def build(self, context: BuildContext, parent: QWidget | None) -> QSlider:
-        widget = QSlider(ORIENTATION.get(self.orientation, Qt.Orientation.Horizontal), parent=parent)
-        widget.setRange(self.min_value, self.max_value)
-        widget.setValue(self.value)
-        widget.setSingleStep(self.step)
-        widget.setTracking(self.tracking)
-        widget.setEnabled(self.enabled)
-        context.values[self.id] = widget.value
-        if len(self.on_change) > 0:
-            widget.valueChanged.connect(lambda value: self.emit(context, self.on_change, value))
+    def create(self, parent: QWidget | None) -> QSlider:
+        widget = QSlider(parent=parent)
+        widget.valueChanged.connect(lambda value: self.emit(self.on_change, value))
         return widget
+
+    def apply(self, changed: set[str]) -> None:
+        super().apply(changed)
+        widget = self.widget
+        if "orientation" in changed:
+            widget.setOrientation(ORIENTATION.get(self.orientation, Qt.Orientation.Horizontal))
+        # The range before the value, otherwise Qt clamps the value to the old range.
+        if changed & {"min_value", "max_value"}:
+            widget.setRange(self.min_value, self.max_value)
+        if "value" in changed:
+            widget.setValue(self.value)
+        if "step" in changed:
+            widget.setSingleStep(self.step)
+        if "tracking" in changed:
+            widget.setTracking(self.tracking)
+
+    def read(self) -> int:
+        return self.widget.value()
